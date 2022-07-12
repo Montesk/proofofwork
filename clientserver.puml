@@ -1,0 +1,18 @@
+@startuml
+Actor Client
+Boundary Server
+
+Client -> Server : Request Service
+Server -> Server : Choose a challenge
+Server -> Client : Response **challenge**
+Client -> Client : Solve **challenge**
+Client -> Server : Prove (Verify) **challenge**
+
+note across
+Base on proof result
+end note
+
+Client <- Server : **Authorized**
+Client x- Server : **Not solved**
+
+@enduml
