@@ -1,14 +1,13 @@
 package main
 
 import (
+	"github.com/faraway/wordofwisdom/config"
 	"github.com/faraway/wordofwisdom/server"
 	"log"
 )
 
 func main() {
-	srv := server.New("tcp", ":8001")
-
-	err := RunApp(srv)
+	err := RunApp(config.New("tcp", ":8001"))
 	if err != nil {
 		log.Fatalf("server run error err: %v", err)
 	}
@@ -16,7 +15,9 @@ func main() {
 	log.Printf("shutdown")
 }
 
-func RunApp(srv server.Server) error {
+func RunApp(cfg config.Config) error {
+	srv := server.New(cfg)
+
 	err := runServer(srv)
 	if err != nil {
 		return err

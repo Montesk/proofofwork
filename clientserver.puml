@@ -9,9 +9,8 @@ Client -> Client : Solve **challenge**
 Client -> Server : Prove (Verify) **challenge**
 
 note across
-Base on proof result
+One of based on proof result
 end note
-
 Client <- Server : **Authorized**
 Client x- Server : **Not solved**
 

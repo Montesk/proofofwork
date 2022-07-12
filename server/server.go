@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"git.ll-games.com/backend/daily/go1.17rc1/src/log"
+	"github.com/faraway/wordofwisdom/config"
 	"github.com/faraway/wordofwisdom/errors"
 	"net"
 )
@@ -25,10 +26,10 @@ type (
 	}
 )
 
-func New(protocol string, port string) *server {
+func New(cfg config.Config) *server {
 	return &server{
-		protocol: protocol,
-		port:     port,
+		protocol: cfg.Protocol(),
+		port:     cfg.Port(),
 	}
 }
 
