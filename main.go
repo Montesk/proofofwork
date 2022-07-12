@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	err := RunApp(config.New("tcp", ":8001"))
+	err := Run(config.New("tcp", ":8001", server.DefaultReadTimeout))
 	if err != nil {
 		log.Fatalf("server run error err: %v", err)
 	}
@@ -15,13 +15,15 @@ func main() {
 	log.Printf("shutdown")
 }
 
-func RunApp(cfg config.Config) error {
+func Run(cfg config.Config) error {
 	srv := server.New(cfg)
 
-	err := runServer(srv)
+	err := srv.Run()
 	if err != nil {
 		return err
 	}
+
+	log.Printf("tcp server start")
 
 	defer func() {
 		err := srv.Close()
@@ -30,15 +32,7 @@ func RunApp(cfg config.Config) error {
 		}
 	}()
 
-	log.Printf("tcp server start")
+	log.Printf("listening...")
 
-	return listenConnections(srv)
-}
-
-func runServer(srv server.Server) error {
-	return srv.Run()
-}
-
-func listenConnections(srv server.Server) error {
 	return srv.Listen()
 }

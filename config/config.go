@@ -1,28 +1,37 @@
 package config
 
+import "time"
+
 type (
-	config struct {
-		port     string
-		protocol string
+	Config interface {
+		Protocol() string
+		Port() string
+		ReadTimeout() time.Duration
 	}
 
-	Config interface {
-		Port() string
-		Protocol() string
+	config struct {
+		protocol    string
+		port        string
+		readTimeout time.Duration
 	}
 )
 
-func (c config) Port() string {
-	return c.port
+func New(protocol, port string, readTimeout time.Duration) Config {
+	return &config{
+		protocol:    protocol,
+		port:        port,
+		readTimeout: readTimeout,
+	}
 }
 
 func (c config) Protocol() string {
 	return c.protocol
 }
 
-func New(protocol, port string) Config {
-	return &config{
-		protocol: protocol,
-		port:     port,
-	}
+func (c config) Port() string {
+	return c.port
+}
+
+func (c config) ReadTimeout() time.Duration {
+	return c.readTimeout
 }

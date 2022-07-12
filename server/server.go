@@ -3,12 +3,16 @@ package server
 import (
 	"fmt"
 	"git.ll-games.com/backend/daily/go1.17rc1/src/log"
+	"github.com/faraway/wordofwisdom/client"
 	"github.com/faraway/wordofwisdom/config"
 	"github.com/faraway/wordofwisdom/errors"
 	"net"
+	"time"
 )
 
 const (
+	DefaultReadTimeout = 10 * time.Second
+
 	ErrServerNotReady = errors.String("server not ready")
 )
 
@@ -20,24 +24,24 @@ type (
 	}
 
 	server struct {
-		protocol string
-		port     string
+		cfg      config.Config
 		listener net.Listener
 	}
 )
 
 func New(cfg config.Config) *server {
 	return &server{
-		protocol: cfg.Protocol(),
-		port:     cfg.Port(),
+		cfg: cfg,
 	}
 }
 
 func (s *server) Run() error {
-	listener, err := net.Listen(s.protocol, s.port)
+	listener, err := net.Listen(s.cfg.Protocol(), s.cfg.Port())
 	if err != nil {
 		return err
 	}
+
+	log.Print("server started port: ", s.cfg.Port())
 
 	s.listener = listener
 
@@ -48,6 +52,8 @@ func (s *server) Close() error {
 	if !s.ready() {
 		return ErrServerNotReady
 	}
+
+	log.Printf("server %s closed", s.cfg.Port())
 
 	return s.listener.Close()
 }
@@ -63,11 +69,14 @@ func (s *server) Listen() error {
 			return fmt.Errorf("accept listener err %v", err)
 		}
 
-		log.Printf("received connection %v", conn)
+		cl := client.New(conn, s.cfg.ReadTimeout())
 
-		conn.Close()
+		log.Printf("client: %s connected", cl.Addr())
 
-		log.Printf("connection closed")
+		go func() {
+			defer cl.Close()
+			cl.Listen()
+		}()
 	}
 }
 
