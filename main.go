@@ -16,8 +16,10 @@ func main() {
 	log.Printf("shutdown")
 }
 
+var routes = map[string]func(){}
+
 func Run(cfg config.Config) error {
-	srv := server.New(cfg, router.New())
+	srv := server.New(cfg, router.New(routes))
 
 	err := srv.Run()
 	if err != nil {

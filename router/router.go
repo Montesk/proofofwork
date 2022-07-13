@@ -20,9 +20,9 @@ type (
 	}
 )
 
-func New() Router {
+func New(routes map[string]func()) Router {
 	return &router{
-		routes: map[string]func(){},
+		routes: routes,
 	}
 }
 

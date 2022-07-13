@@ -43,7 +43,7 @@ func (c *client[T]) Listen() error {
 		reader := bufio.NewReader(c.conn)
 
 		raw, err := reader.ReadBytes('\n')
-		if err != nil && errors.Is(err, io.EOF) {
+		if clientDisconnected(err) {
 			return nil
 		} else if err != nil {
 			log.Printf("error parse message from client %v", err)
@@ -71,4 +71,9 @@ func (c *client[T]) Close() error {
 
 func (c *client[T]) Addr() string {
 	return c.conn.RemoteAddr().String()
+}
+
+func clientDisconnected(err error) bool {
+	var netErr net.Error
+	return errors.Is(err, io.EOF) || (errors.As(err, &netErr) && netErr.Timeout())
 }
