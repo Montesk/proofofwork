@@ -2,6 +2,9 @@ package client
 
 import (
 	"bufio"
+	"encoding/json"
+	"errors"
+	"io"
 	"log"
 	"net"
 	"time"
@@ -14,20 +17,23 @@ type (
 		Addr() string
 	}
 
-	client struct {
+	// typed parameter T must be supported to json.Unmarshal value e.g. interface, map[string]interface or concrete struct
+	client[T any] struct {
 		conn        net.Conn
 		readTimeout time.Duration
+		requests    chan T
 	}
 )
 
-func New(conn net.Conn, timeout time.Duration) Client {
-	return &client{
+func New[T any](conn net.Conn, timeout time.Duration, requests chan T) Client {
+	return &client[T]{
 		conn:        conn,
 		readTimeout: timeout,
+		requests:    requests,
 	}
 }
 
-func (c *client) Listen() error {
+func (c *client[T]) Listen() error {
 	err := c.conn.SetReadDeadline(time.Now().Add(c.readTimeout))
 	if err != nil {
 		return err
@@ -36,20 +42,33 @@ func (c *client) Listen() error {
 	for {
 		reader := bufio.NewReader(c.conn)
 
-		msg, err := reader.ReadString('\n')
-		if err != nil {
-			return err
+		raw, err := reader.ReadBytes('\n')
+		if err != nil && errors.Is(err, io.EOF) {
+			return nil
+		} else if err != nil {
+			log.Printf("error parse message from client %v", err)
+			continue
 		}
 
-		log.Printf("recieved message from client msg %s", msg)
+		msg := *new(T)
+
+		err = json.Unmarshal(raw, &msg)
+		if err != nil {
+			log.Printf("error parse message from client %v", err)
+			continue
+		}
+
+		log.Printf("recieved message from client msg %v", msg)
+
+		c.requests <- msg
 	}
 }
 
-func (c *client) Close() error {
+func (c *client[T]) Close() error {
 	log.Printf("client connection closed %s", c.Addr())
 	return c.conn.Close()
 }
 
-func (c *client) Addr() string {
+func (c *client[T]) Addr() string {
 	return c.conn.RemoteAddr().String()
 }

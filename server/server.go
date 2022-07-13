@@ -6,6 +6,8 @@ import (
 	"github.com/faraway/wordofwisdom/client"
 	"github.com/faraway/wordofwisdom/config"
 	"github.com/faraway/wordofwisdom/errors"
+	"github.com/faraway/wordofwisdom/protocol"
+	"github.com/faraway/wordofwisdom/router"
 	"net"
 	"time"
 )
@@ -24,24 +26,26 @@ type (
 	}
 
 	server struct {
-		cfg      config.Config
+		config   config.Config
+		router   router.Router
 		listener net.Listener
 	}
 )
 
-func New(cfg config.Config) *server {
+func New(config config.Config, router router.Router) *server {
 	return &server{
-		cfg: cfg,
+		config: config,
+		router: router,
 	}
 }
 
 func (s *server) Run() error {
-	listener, err := net.Listen(s.cfg.Protocol(), s.cfg.Port())
+	listener, err := net.Listen(s.config.Protocol(), s.config.Port())
 	if err != nil {
 		return err
 	}
 
-	log.Print("server started port: ", s.cfg.Port())
+	log.Print("server started port: ", s.config.Port())
 
 	s.listener = listener
 
@@ -53,7 +57,7 @@ func (s *server) Close() error {
 		return ErrServerNotReady
 	}
 
-	log.Printf("server %s closed", s.cfg.Port())
+	log.Printf("server %s closed", s.config.Port())
 
 	return s.listener.Close()
 }
@@ -69,17 +73,43 @@ func (s *server) Listen() error {
 			return fmt.Errorf("accept listener err %v", err)
 		}
 
-		cl := client.New(conn, s.cfg.ReadTimeout())
+		requests := make(chan protocol.Client)
+
+		cl := client.New[protocol.Client](conn, s.config.ReadTimeout(), requests)
 
 		log.Printf("client: %s connected", cl.Addr())
 
-		go func() {
-			defer cl.Close()
-			cl.Listen()
-		}()
+		go s.handle(cl, requests)
 	}
 }
 
 func (s *server) ready() bool {
 	return s.listener != nil
+}
+
+func (s *server) handle(cl client.Client, requests chan protocol.Client) {
+	disconnect := make(chan struct{})
+
+	defer func() {
+		cl.Close()
+		disconnect <- struct{}{}
+	}()
+
+	go s.handleRequests(cl, requests, disconnect)
+
+	cl.Listen()
+}
+
+func (s *server) handleRequests(cl client.Client, requests chan protocol.Client, disconnect chan struct{}) {
+	for {
+		select {
+		case req := <-requests:
+			err := s.router.Handle(req.Controller)
+			if err != nil {
+				log.Printf("error handler message err: %v client %v", err, cl.Addr())
+			}
+		case <-disconnect:
+			return
+		}
+	}
 }

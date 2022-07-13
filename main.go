@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/faraway/wordofwisdom/config"
+	"github.com/faraway/wordofwisdom/router"
 	"github.com/faraway/wordofwisdom/server"
 	"log"
 )
@@ -16,7 +17,7 @@ func main() {
 }
 
 func Run(cfg config.Config) error {
-	srv := server.New(cfg)
+	srv := server.New(cfg, router.New())
 
 	err := srv.Run()
 	if err != nil {
