@@ -28,6 +28,11 @@ func New() Router {
 }
 
 func (r *router) Register(path string, handler func(ses session.Session)) {
+	_, found := r.routes[path]
+	if found {
+		log.Fatalf("route %s already registered", path)
+	}
+
 	r.routes[path] = handler
 }
 
