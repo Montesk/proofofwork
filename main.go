@@ -4,6 +4,7 @@ import (
 	"github.com/faraway/wordofwisdom/config"
 	"github.com/faraway/wordofwisdom/router"
 	"github.com/faraway/wordofwisdom/server"
+	"github.com/faraway/wordofwisdom/sessioner"
 	"log"
 )
 
@@ -16,10 +17,8 @@ func main() {
 	log.Printf("shutdown")
 }
 
-var routes = map[string]func(){}
-
 func Run(cfg config.Config) error {
-	srv := server.New(cfg, router.New(routes))
+	srv := server.New(cfg, router.New(), sessioner.New())
 
 	err := srv.Run()
 	if err != nil {

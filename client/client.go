@@ -50,6 +50,11 @@ func (c *client[T]) Listen() error {
 			continue
 		}
 
+		err = c.conn.SetReadDeadline(time.Now().Add(c.readTimeout))
+		if err != nil {
+			return err
+		}
+
 		msg := *new(T)
 
 		err = json.Unmarshal(raw, &msg)
@@ -73,7 +78,7 @@ func (c *client[T]) Addr() string {
 	return c.conn.RemoteAddr().String()
 }
 
-func clientDisconnected(err error) bool {
-	var netErr net.Error
-	return errors.Is(err, io.EOF) || (errors.As(err, &netErr) && netErr.Timeout())
+func clientDisconnected(got error) bool {
+	var err net.Error
+	return errors.Is(got, io.EOF) || (errors.As(got, &err) && err.Timeout())
 }

@@ -3,12 +3,13 @@ package server
 import (
 	"github.com/faraway/wordofwisdom/config"
 	"github.com/faraway/wordofwisdom/router"
+	"github.com/faraway/wordofwisdom/sessioner"
 	"testing"
 	"time"
 )
 
 const (
-	defaultTestWaitTime = 100 * time.Millisecond
+	defaultTestWaitTime = 50 * time.Millisecond
 )
 
 type (
@@ -36,7 +37,7 @@ func (m mockConfig) ReadTimeout() time.Duration {
 }
 
 func TestServer_Run(t *testing.T) {
-	srv := New(newMockConfig(":8001"), router.Null())
+	srv := New(newMockConfig(":8001"), router.Null(), sessioner.New())
 
 	err := srv.Run()
 	if err != nil {
@@ -47,7 +48,7 @@ func TestServer_Run(t *testing.T) {
 }
 
 func TestServer_Listen(t *testing.T) {
-	srv := New(newMockConfig(":8002"), router.Null())
+	srv := New(newMockConfig(":8002"), router.Null(), sessioner.New())
 
 	err := srv.Run()
 	if err != nil {
@@ -74,7 +75,7 @@ func TestServer_Listen(t *testing.T) {
 }
 
 func TestServer_Close(t *testing.T) {
-	srv := New(newMockConfig(":8003"), router.Null())
+	srv := New(newMockConfig(":8003"), router.Null(), sessioner.New())
 
 	err := srv.Run()
 	if err != nil {

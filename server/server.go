@@ -6,8 +6,10 @@ import (
 	"github.com/faraway/wordofwisdom/client"
 	"github.com/faraway/wordofwisdom/config"
 	"github.com/faraway/wordofwisdom/errors"
+	"github.com/faraway/wordofwisdom/handlers"
 	"github.com/faraway/wordofwisdom/protocol"
 	"github.com/faraway/wordofwisdom/router"
+	"github.com/faraway/wordofwisdom/sessioner"
 	"net"
 	"time"
 )
@@ -26,16 +28,18 @@ type (
 	}
 
 	server struct {
-		config   config.Config
-		router   router.Router
-		listener net.Listener
+		config    config.Config
+		router    router.Router
+		sessioner sessioner.Sessioner
+		listener  net.Listener
 	}
 )
 
-func New(config config.Config, router router.Router) *server {
+func New(cfg config.Config, rt router.Router, ss sessioner.Sessioner) *server {
 	return &server{
-		config: config,
-		router: router,
+		sessioner: ss,
+		config:    cfg,
+		router:    rt,
 	}
 }
 
@@ -48,6 +52,8 @@ func (s *server) Run() error {
 	log.Print("server started port: ", s.config.Port())
 
 	s.listener = listener
+
+	s.registerHandlers()
 
 	return nil
 }
@@ -77,6 +83,12 @@ func (s *server) Listen() error {
 
 		cl := client.New[protocol.Client](conn, s.config.ReadTimeout(), requests)
 
+		err = s.registerClient(cl, conn)
+		if err != nil {
+			log.Printf("can't register client %s err %v", cl.Addr(), err)
+			continue
+		}
+
 		log.Printf("client: %s connected", cl.Addr())
 
 		go s.handle(cl, requests)
@@ -85,6 +97,10 @@ func (s *server) Listen() error {
 
 func (s *server) ready() bool {
 	return s.listener != nil
+}
+
+func (s *server) registerClient(client client.Client, conn net.Conn) error {
+	return s.sessioner.Register(client, conn)
 }
 
 func (s *server) handle(cl client.Client, requests chan protocol.Client) {
@@ -104,12 +120,31 @@ func (s *server) handleRequests(cl client.Client, requests chan protocol.Client,
 	for {
 		select {
 		case req := <-requests:
-			err := s.router.Handle(req.Controller)
+			ses, err := s.sessioner.Session(cl.Addr())
+			if err != nil {
+				log.Printf("error retrieve client session: %v client %v", err, cl.Addr())
+				continue
+			}
+
+			err = s.router.Handle(req.Controller, ses)
 			if err != nil {
 				log.Printf("error handler message err: %v client %v", err, cl.Addr())
 			}
 		case <-disconnect:
+			err := s.sessioner.Unregister(cl)
+			if err != nil {
+				log.Printf("error client unregister err: %v client %v", err, cl.Addr())
+			}
+
 			return
 		}
+	}
+}
+
+func (s *server) registerHandlers() {
+	h := handlers.New()
+
+	for controller, handler := range h.All() {
+		s.router.Register(string(controller), handler)
 	}
 }

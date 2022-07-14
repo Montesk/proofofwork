@@ -1,12 +1,14 @@
 package router
 
+import "github.com/faraway/wordofwisdom/session"
+
 type (
 	null struct{}
 )
 
 func Null() Router {
 	return &router{
-		routes: map[string]func(){},
+		routes: map[string]func(ses session.Session){},
 	}
 }
 
