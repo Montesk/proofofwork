@@ -79,9 +79,9 @@ func (s *server) Listen() error {
 			return fmt.Errorf("accept listener err %v", err)
 		}
 
-		requests := make(chan protocol.Client)
+		requests := make(chan protocol.ClientMessage)
 
-		cl := client.New[protocol.Client](conn, s.config.ReadTimeout(), requests)
+		cl := client.New[protocol.ClientMessage](conn, s.config.ReadTimeout(), requests)
 
 		err = s.registerClient(cl, conn)
 		if err != nil {
@@ -103,7 +103,7 @@ func (s *server) registerClient(client client.Client, conn net.Conn) error {
 	return s.sessioner.Register(client, conn)
 }
 
-func (s *server) handle(cl client.Client, requests chan protocol.Client) {
+func (s *server) handle(cl client.Client, requests chan protocol.ClientMessage) {
 	disconnect := make(chan struct{})
 
 	defer func() {
@@ -116,7 +116,7 @@ func (s *server) handle(cl client.Client, requests chan protocol.Client) {
 	cl.Listen()
 }
 
-func (s *server) handleRequests(cl client.Client, requests chan protocol.Client, disconnect chan struct{}) {
+func (s *server) handleRequests(cl client.Client, requests chan protocol.ClientMessage, disconnect chan struct{}) {
 	for {
 		select {
 		case req := <-requests:

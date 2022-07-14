@@ -2,13 +2,14 @@ package session
 
 import (
 	"encoding/json"
+	"github.com/faraway/wordofwisdom/protocol"
 	"net"
 )
 
 type (
 	Session interface {
 		ClientId() string
-		Send(message interface{}) error
+		Send(action string, message interface{}) error
 	}
 
 	session struct {
@@ -21,8 +22,13 @@ func (s *session) ClientId() string {
 	return s.clientId
 }
 
-func (s *session) Send(message interface{}) error {
-	raw, err := json.Marshal(message)
+func (s *session) Send(action string, message interface{}) error {
+	response := protocol.Action{
+		Action:  action,
+		Message: message,
+	}
+
+	raw, err := json.Marshal(response)
 	if err != nil {
 		return err
 	}

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/faraway/wordofwisdom/protocol"
 	"github.com/faraway/wordofwisdom/session"
 	"log"
 )
@@ -12,11 +13,7 @@ const (
 )
 
 func ChallengeHandler(ses session.Session) {
-	err := ses.Send(struct {
-		Action    string `json:"action"`
-		Challenge string `json:"challenge"`
-	}{
-		Action:    ChallengeAction,
+	err := ses.Send(ChallengeAction, protocol.ChallengeAction{
 		Challenge: fmt.Sprintf("Take your challenge %v !", ses.ClientId()),
 	})
 
