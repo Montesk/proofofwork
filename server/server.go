@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	DefaultReadTimeout = 10 * time.Second
+	DefaultReadTimeout = 1 * time.Minute
 
 	ErrServerNotReady = errors.String("server not ready")
 )

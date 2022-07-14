@@ -23,7 +23,7 @@ type (
 	sessioner struct {
 		mu      *sync.Mutex
 		storage map[string]struct {
-			client  *client.Client
+			client  client.Client
 			session session.Session
 		}
 	}
@@ -33,7 +33,7 @@ func New() Sessioner {
 	return &sessioner{
 		mu: new(sync.Mutex),
 		storage: map[string]struct {
-			client  *client.Client
+			client  client.Client
 			session session.Session
 		}{},
 	}
@@ -61,10 +61,10 @@ func (s *sessioner) Register(cl client.Client, conn net.Conn) error {
 	}
 
 	s.storage[cl.Addr()] = struct {
-		client  *client.Client
+		client  client.Client
 		session session.Session
 	}{
-		client:  &cl,
+		client:  cl,
 		session: session.New(cl.Addr(), conn),
 	}
 

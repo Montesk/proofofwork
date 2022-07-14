@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/faraway/wordofwisdom/protocol"
 	"github.com/faraway/wordofwisdom/session"
 	"log"
@@ -12,12 +11,17 @@ const (
 	ChallengeAction     = "challenge"
 )
 
-func ChallengeHandler(ses session.Session) {
-	err := ses.Send(ChallengeAction, protocol.ChallengeAction{
-		Challenge: fmt.Sprintf("Take your challenge %v !", ses.ClientId()),
-	})
-
+func (h *handlers) ChallengeHandler(ses session.Session) {
+	challenge, err := h.pow.Generate(ses.ClientId())
 	if err != nil {
-		log.Fatal(err)
+		log.Print("error generating message to client ", err)
 	}
+
+	err = ses.Send(ChallengeAction, protocol.ChallengeAction{
+		Challenge: challenge,
+	})
+	if err != nil {
+		log.Print("error sending message to client ", err)
+	}
+
 }

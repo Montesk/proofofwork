@@ -6,9 +6,13 @@ import (
 	"github.com/faraway/wordofwisdom/server"
 	"github.com/faraway/wordofwisdom/sessioner"
 	"log"
+	"math/rand"
+	"time"
 )
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
+
 	err := Run(config.New("tcp", ":8001", server.DefaultReadTimeout))
 	if err != nil {
 		log.Fatalf("server run error err: %v", err)
