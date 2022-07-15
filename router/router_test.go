@@ -1,6 +1,7 @@
 package router
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/Montesk/proofofwork/handlers"
 	"github.com/Montesk/proofofwork/session"
@@ -38,6 +39,45 @@ func TestRouter_Handle(t *testing.T) {
 		for {
 			select {
 			case <-got:
+				return // pass
+			case <-time.After(1 * time.Second):
+				t.Error("expect handler was called")
+				return
+			}
+		}
+	})
+
+	t.Run("handler pass json message", func(t *testing.T) {
+		got := make(chan struct {
+			value string
+		})
+
+		msg := struct {
+			value string
+		}{
+			value: "message in handler",
+		}
+
+		name := "handler_name"
+		handler := func(ses session.Session, _ any) {
+			got <- msg
+		}
+
+		rt := New()
+
+		rt.Register(name, handlers.BuildRoute[any](handler))
+
+		raw, _ := json.Marshal(msg)
+
+		go rt.Handle(name, session.Null(), raw)
+
+		for {
+			select {
+			case gotMsg := <-got:
+				if msg != gotMsg {
+					t.Errorf("expect message from handler %v got %v", msg, gotMsg)
+					return
+				}
 				return // pass
 			case <-time.After(1 * time.Second):
 				t.Error("expect handler was called")
