@@ -11,7 +11,7 @@ const (
 	ChallengeAction     = "challenge"
 )
 
-func (h *handlers) ChallengeHandler(ses session.Session) {
+func (h *handlers) ChallengeHandler(ses session.Session, _ any) {
 	challenge, err := h.pow.Generate(ses.ClientId())
 	if err != nil {
 		log.Print("error generating message to client ", err)

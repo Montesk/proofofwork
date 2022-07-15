@@ -1,9 +1,11 @@
 package protocol
 
+import "encoding/json"
+
 type (
 	ClientMessage struct {
-		Controller string `json:"controller"`
-		Message    string `json:"message"`
+		Controller string          `json:"controller"`
+		Message    json.RawMessage `json:"message"`
 	}
 
 	Action struct {

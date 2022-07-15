@@ -12,6 +12,8 @@ const (
 )
 
 func (h *handlers) ProveHandler(ses session.Session, msg protocol.ProveController) {
+	log.Printf("recieved prove attempt from client %s msg %s", ses.ClientId(), msg.Suggest)
+
 	success := h.pow.Prove(ses.ClientId(), msg.Suggest)
 
 	var err error

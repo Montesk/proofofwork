@@ -1,6 +1,8 @@
 package router
 
-import "github.com/faraway/wordofwisdom/session"
+import (
+	"github.com/faraway/wordofwisdom/handlers"
+)
 
 type (
 	null struct{}
@@ -8,7 +10,7 @@ type (
 
 func Null() Router {
 	return &router{
-		routes: map[string]func(ses session.Session){},
+		routes: map[string]handlers.Handler{},
 	}
 }
 

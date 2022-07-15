@@ -3,7 +3,7 @@ package handlers
 import (
 	"github.com/faraway/wordofwisdom/book"
 	"github.com/faraway/wordofwisdom/pow"
-	"github.com/faraway/wordofwisdom/session"
+	"github.com/faraway/wordofwisdom/protocol"
 )
 
 type (
@@ -12,19 +12,17 @@ type (
 
 type (
 	Handlers interface {
-		All() map[Controller]handler
+		All() map[Controller]Handler
 	}
-
-	handler func(ses session.Session)
 
 	handlers struct {
 		pow  pow.POW
 		book book.Book
-		list map[Controller]handler
+		list map[Controller]Handler
 	}
 )
 
-func (h *handlers) All() map[Controller]handler {
+func (h *handlers) All() map[Controller]Handler {
 	return h.list
 }
 
@@ -32,7 +30,7 @@ func New() Handlers {
 	h := &handlers{
 		pow:  pow.New(),
 		book: book.New(),
-		list: map[Controller]handler{},
+		list: map[Controller]Handler{},
 	}
 
 	h.setupRoutes()
@@ -41,5 +39,6 @@ func New() Handlers {
 }
 
 func (h *handlers) setupRoutes() {
-	h.list[ChallengeController] = h.ChallengeHandler
+	h.list[ChallengeController] = BuildRoute[any](h.ChallengeHandler)
+	h.list[ProveController] = BuildRoute[protocol.ProveController](h.ProveHandler)
 }

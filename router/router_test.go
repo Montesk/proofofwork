@@ -2,6 +2,7 @@ package router
 
 import (
 	"errors"
+	"github.com/faraway/wordofwisdom/handlers"
 	"github.com/faraway/wordofwisdom/session"
 	"testing"
 	"time"
@@ -12,9 +13,9 @@ func TestRouter_Handle(t *testing.T) {
 		name := "handler_name"
 
 		rt := New()
-		rt.Register(name, func(ses session.Session) {})
+		rt.Register(name, handlers.BuildRoute[any](func(ses session.Session, _ any) {}))
 
-		err := rt.Handle(name, session.Null())
+		err := rt.Handle(name, session.Null(), nil)
 		if err != nil {
 			t.Errorf("expect no error on handler call got err %v", err)
 		}
@@ -24,15 +25,15 @@ func TestRouter_Handle(t *testing.T) {
 		got := make(chan struct{})
 
 		name := "handler_name"
-		handler := func(ses session.Session) {
+		handler := func(ses session.Session, _ any) {
 			got <- struct{}{}
 		}
 
 		rt := New()
 
-		rt.Register(name, handler)
+		rt.Register(name, handlers.BuildRoute[any](handler))
 
-		go rt.Handle(name, session.Null())
+		go rt.Handle(name, session.Null(), nil)
 
 		for {
 			select {
@@ -50,7 +51,7 @@ func TestRouter_Handle(t *testing.T) {
 
 		rt := New()
 
-		err := rt.Handle(name, session.Null())
+		err := rt.Handle(name, session.Null(), nil)
 		if err == nil {
 			t.Errorf("expect no error on handler call got err %v", err)
 		} else {
@@ -65,9 +66,9 @@ func TestRouter_Handle(t *testing.T) {
 
 		rt := New()
 
-		rt.Register("another_route", func(ses session.Session) {})
+		rt.Register("another_route", handlers.BuildRoute[any](func(ses session.Session, _ any) {}))
 
-		err := rt.Handle(name, session.Null())
+		err := rt.Handle(name, session.Null(), nil)
 		if err == nil {
 			t.Errorf("expect no error on handler call got err %v", err)
 		} else {

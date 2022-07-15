@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	DefaultReadTimeout = 1 * time.Minute
+	DefaultReadTimeout = 10 * time.Minute
 
 	ErrServerNotReady = errors.String("server not ready")
 )
@@ -126,7 +126,7 @@ func (s *server) handleRequests(cl client.Client, requests chan protocol.ClientM
 				continue
 			}
 
-			err = s.router.Handle(req.Controller, ses)
+			err = s.router.Handle(req.Controller, ses, req.Message)
 			if err != nil {
 				log.Printf("error handler message err: %v client %v", err, cl.Addr())
 			}

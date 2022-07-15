@@ -21,7 +21,7 @@ Example response
 
 #### Prove controller
 ```json
-{ "controller": "prove", "prove": "c1419d1224dba805efb4c0397db229db747a56ea|bb6f6c336e94819f99a64b8ab3b03161a298be43|c1419d1224dba805efb4c0397db229db747a56ea" }
+{ "controller": "prove", "message": { "suggest": "c1419d1224dba805efb4c0397db229db747a56ea|bb6f6c336e94819f99a64b8ab3b03161a298be43|c1419d1224dba805efb4c0397db229db747a56ea" } }
 ```
 
 Example success response
