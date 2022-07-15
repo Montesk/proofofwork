@@ -43,7 +43,7 @@ Example failed response
 ```
 
 ### POW Algorithm
-* Client ip address registered in the system after client login, server generates random nonce. Client IP address encrypted in SHA-1 in pattern [date|ip-address|nonce]. All parts are sha-1 encoded
-* Server sends to client hash but without nonce part [date|ip-address]
-* Client prepares header [date|ip-address|nonce] and try to suggest nonce (incrementally from 0)
-* Client try to prove [date|ip-address|client_incr_nonce]
+* Client ip address registered in the system after client login, server generates random nonce. Client IP address encrypted in SHA-1 in pattern `[date|ip-address|nonce]`. All parts are sha-1 encoded
+* Server sends to client hash but without nonce part `[date|ip-address]`
+* Client prepares header `[date|ip-address|nonce]` and try to suggest nonce (incrementally from 0)
+* Client try to prove `[date|ip-address|client_incr_nonce]`
