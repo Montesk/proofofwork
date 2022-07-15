@@ -1,7 +1,7 @@
 package router
 
 import (
-	"github.com/faraway/wordofwisdom/handlers"
+	"github.com/Montesk/wordofwisdom/handlers"
 )
 
 type (

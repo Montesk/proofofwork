@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/faraway/wordofwisdom/config"
-	"github.com/faraway/wordofwisdom/router"
-	"github.com/faraway/wordofwisdom/server"
-	"github.com/faraway/wordofwisdom/sessioner"
+	"github.com/Montesk/wordofwisdom/config"
+	"github.com/Montesk/wordofwisdom/router"
+	"github.com/Montesk/wordofwisdom/server"
+	"github.com/Montesk/wordofwisdom/sessioner"
 	"log"
 	"math/rand"
 	"time"

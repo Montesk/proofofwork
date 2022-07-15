@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/faraway/wordofwisdom/session"
+	"github.com/Montesk/wordofwisdom/session"
 )
 
 type (

@@ -2,7 +2,7 @@ package pow
 
 import (
 	"fmt"
-	"github.com/faraway/wordofwisdom/errors"
+	"github.com/Montesk/wordofwisdom/errors"
 	"strconv"
 )
 

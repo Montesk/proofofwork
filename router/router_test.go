@@ -2,8 +2,8 @@ package router
 
 import (
 	"errors"
-	"github.com/faraway/wordofwisdom/handlers"
-	"github.com/faraway/wordofwisdom/session"
+	"github.com/Montesk/wordofwisdom/handlers"
+	"github.com/Montesk/wordofwisdom/session"
 	"testing"
 	"time"
 )

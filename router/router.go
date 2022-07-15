@@ -2,9 +2,9 @@ package router
 
 import (
 	"encoding/json"
-	"github.com/faraway/wordofwisdom/errors"
-	"github.com/faraway/wordofwisdom/handlers"
-	"github.com/faraway/wordofwisdom/session"
+	"github.com/Montesk/wordofwisdom/errors"
+	"github.com/Montesk/wordofwisdom/handlers"
+	"github.com/Montesk/wordofwisdom/session"
 	"log"
 )
 

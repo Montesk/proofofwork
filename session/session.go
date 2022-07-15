@@ -2,7 +2,7 @@ package session
 
 import (
 	"encoding/json"
-	"github.com/faraway/wordofwisdom/protocol"
+	"github.com/Montesk/wordofwisdom/protocol"
 	"net"
 )
 

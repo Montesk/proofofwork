@@ -1,9 +1,9 @@
 package server
 
 import (
-	"github.com/faraway/wordofwisdom/config"
-	"github.com/faraway/wordofwisdom/router"
-	"github.com/faraway/wordofwisdom/sessioner"
+	"github.com/Montesk/wordofwisdom/config"
+	"github.com/Montesk/wordofwisdom/router"
+	"github.com/Montesk/wordofwisdom/sessioner"
 	"testing"
 	"time"
 )
