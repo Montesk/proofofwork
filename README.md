@@ -29,7 +29,7 @@ Example success response
 {
   "action": "prove",
   "success": true,
-  "message": "try again"
+  "message": "You could make it a singleton too, but friends don’t let friends create singletons.\" ― Robert Nystrom"
 }
 ```
 
