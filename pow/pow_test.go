@@ -8,8 +8,6 @@ import (
 )
 
 func TestPow_GenerateAndProve(t *testing.T) {
-	rand.Seed(time.Now().UnixNano())
-
 	tests := map[string]struct {
 		generatedClientId string
 		requestClientId   string
@@ -38,6 +36,8 @@ func TestPow_GenerateAndProve(t *testing.T) {
 
 	for title, test := range tests {
 		t.Run(title, func(t *testing.T) {
+			rand.Seed(time.Now().UnixNano())
+
 			service := New()
 
 			challenge, _ := service.Generate(test.generatedClientId)

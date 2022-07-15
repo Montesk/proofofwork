@@ -47,10 +47,7 @@ func (c *client) Suggest(challenge string, tries int) (int, error) {
 	if !success {
 		tries += 1
 
-		_, err := c.Suggest(challenge, tries)
-		if err != nil {
-			return 0, err
-		}
+		return c.Suggest(challenge, tries)
 	}
 
 	return tries, nil
