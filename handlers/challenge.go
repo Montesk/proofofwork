@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"github.com/Montesk/wordofwisdom/protocol"
-	"github.com/Montesk/wordofwisdom/session"
+	"github.com/Montesk/proofofwork/protocol"
+	"github.com/Montesk/proofofwork/session"
 	"log"
 )
 

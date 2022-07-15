@@ -1,9 +1,9 @@
 package sessioner
 
 import (
-	"github.com/Montesk/wordofwisdom/client"
-	"github.com/Montesk/wordofwisdom/errors"
-	"github.com/Montesk/wordofwisdom/session"
+	"github.com/Montesk/proofofwork/client"
+	"github.com/Montesk/proofofwork/errors"
+	"github.com/Montesk/proofofwork/session"
 	"net"
 	"sync"
 )

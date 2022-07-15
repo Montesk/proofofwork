@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"github.com/Montesk/wordofwisdom/book"
-	"github.com/Montesk/wordofwisdom/pow"
-	"github.com/Montesk/wordofwisdom/protocol"
+	"github.com/Montesk/proofofwork/book"
+	"github.com/Montesk/proofofwork/pow"
+	"github.com/Montesk/proofofwork/protocol"
 )
 
 type (

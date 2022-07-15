@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/Montesk/wordofwisdom/config"
-	"github.com/Montesk/wordofwisdom/router"
-	"github.com/Montesk/wordofwisdom/server"
-	"github.com/Montesk/wordofwisdom/sessioner"
+	"github.com/Montesk/proofofwork/config"
+	"github.com/Montesk/proofofwork/router"
+	"github.com/Montesk/proofofwork/server"
+	"github.com/Montesk/proofofwork/sessioner"
 	"log"
 	"math/rand"
 	"time"

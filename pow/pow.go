@@ -4,7 +4,7 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
-	"github.com/Montesk/wordofwisdom/errors"
+	"github.com/Montesk/proofofwork/errors"
 	"math/rand"
 	"strings"
 	"sync"

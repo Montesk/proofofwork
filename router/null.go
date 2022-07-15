@@ -1,7 +1,7 @@
 package router
 
 import (
-	"github.com/Montesk/wordofwisdom/handlers"
+	"github.com/Montesk/proofofwork/handlers"
 )
 
 type (

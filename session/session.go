@@ -2,7 +2,7 @@ package session
 
 import (
 	"encoding/json"
-	"github.com/Montesk/wordofwisdom/protocol"
+	"github.com/Montesk/proofofwork/protocol"
 	"net"
 )
 
