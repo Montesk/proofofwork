@@ -37,7 +37,7 @@ func (m mockConfig) ReadTimeout() time.Duration {
 }
 
 func TestServer_Run(t *testing.T) {
-	srv := New(newMockConfig(":8001"), router.Null(), sessioner.New())
+	srv := New(newMockConfig(":8010"), router.Null(), sessioner.New())
 
 	err := srv.Run()
 	if err != nil {
@@ -48,7 +48,7 @@ func TestServer_Run(t *testing.T) {
 }
 
 func TestServer_Listen(t *testing.T) {
-	srv := New(newMockConfig(":8002"), router.Null(), sessioner.New())
+	srv := New(newMockConfig(":8011"), router.Null(), sessioner.New())
 
 	err := srv.Run()
 	if err != nil {
@@ -75,7 +75,7 @@ func TestServer_Listen(t *testing.T) {
 }
 
 func TestServer_Close(t *testing.T) {
-	srv := New(newMockConfig(":8003"), router.Null(), sessioner.New())
+	srv := New(newMockConfig(":8012"), router.Null(), sessioner.New())
 
 	err := srv.Run()
 	if err != nil {

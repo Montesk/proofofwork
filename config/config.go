@@ -24,14 +24,14 @@ func New(protocol, port string, readTimeout time.Duration) Config {
 	}
 }
 
-func (c config) Protocol() string {
+func (c *config) Protocol() string {
 	return c.protocol
 }
 
-func (c config) Port() string {
+func (c *config) Port() string {
 	return c.port
 }
 
-func (c config) ReadTimeout() time.Duration {
+func (c *config) ReadTimeout() time.Duration {
 	return c.readTimeout
 }

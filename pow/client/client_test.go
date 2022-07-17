@@ -1,7 +1,9 @@
-package pow
+package client
 
 import (
 	"errors"
+	"github.com/Montesk/proofofwork/pow/pow"
+	"github.com/Montesk/proofofwork/pow/service"
 	"math/rand"
 	"testing"
 	"time"
@@ -22,7 +24,7 @@ func TestPow_GenerateAndProve(t *testing.T) {
 		"out of tries limit - err": {
 			generatedClientId: "127.0.0.1:83887",
 			requestClientId:   "127.0.0.1:83887",
-			clientTries:       nonceMax + 100,
+			clientTries:       pow.NonceMax + 100,
 			wantErr:           true,
 			err:               ErrTooManyTries,
 		},
@@ -38,13 +40,16 @@ func TestPow_GenerateAndProve(t *testing.T) {
 		t.Run(title, func(t *testing.T) {
 			rand.Seed(time.Now().UnixNano())
 
-			service := New()
+			sv := service.New()
 
-			challenge, _ := service.Generate(test.generatedClientId)
+			challenge, err := sv.Generate(test.generatedClientId)
+			if err != nil {
+				t.Fatal(err)
+			}
 
-			client := newMockClient(test.requestClientId, service)
+			cl := New(test.requestClientId, sv)
 
-			tries, err := client.Suggest(challenge, test.clientTries)
+			tries, err := cl.Suggest(challenge, test.clientTries)
 			if err != nil {
 				if !test.wantErr {
 					t.Errorf("expect no error got %v", err)

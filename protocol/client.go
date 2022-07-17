@@ -9,8 +9,8 @@ type (
 	}
 
 	Action struct {
-		Action  string      `json:"action"`
-		Message interface{} `json:"message"`
+		Action  string `json:"action"`
+		Message any    `json:"message"`
 	}
 
 	Error struct {

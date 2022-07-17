@@ -1,14 +1,15 @@
-package pow
+package client
 
 import (
 	"fmt"
 	"github.com/Montesk/proofofwork/errors"
+	"github.com/Montesk/proofofwork/pow/pow"
 	"strconv"
 )
 
 // mock implementation of client with some work to suggest nonce part of challenge in SHA-1
 
-const MaxTries = nonceMax + 1
+const MaxTries = pow.NonceMax + 1
 
 const (
 	ErrTooManyTries = errors.String("out of try limits")
@@ -16,25 +17,22 @@ const (
 
 type (
 	Client interface {
-		Work(challenge string, try int) (suggest string)
 		Suggest(challenge string, tries int) (int, error)
 	}
 
 	client struct {
 		id         string
-		service    POW
+		service    pow.POW
 		nonceTries []int
 	}
 )
 
-func (c *client) Work(challenge string, try int) (suggest string) {
-	if intSliceContains(try, c.nonceTries) {
-		return c.Work(challenge, try)
+func New(clientId string, pow pow.POW) Client {
+	return &client{
+		id:         clientId,
+		service:    pow,
+		nonceTries: []int{},
 	}
-
-	c.nonceTries = append(c.nonceTries, try)
-
-	return fmt.Sprintf("%s%s%s", challenge, hashDelimiter, prepareHash([]string{strconv.Itoa(try)}))
 }
 
 func (c *client) Suggest(challenge string, tries int) (int, error) {
@@ -42,7 +40,7 @@ func (c *client) Suggest(challenge string, tries int) (int, error) {
 		return 0, ErrTooManyTries
 	}
 
-	success := c.service.Prove(c.id, c.Work(challenge, tries))
+	success := c.service.Prove(c.id, c.work(challenge, tries))
 
 	if !success {
 		tries += 1
@@ -53,10 +51,12 @@ func (c *client) Suggest(challenge string, tries int) (int, error) {
 	return tries, nil
 }
 
-func newMockClient(clientId string, pow POW) Client {
-	return &client{
-		id:         clientId,
-		service:    pow,
-		nonceTries: []int{},
+func (c *client) work(challenge string, try int) (suggest string) {
+	if pow.SliceContains[int](try, c.nonceTries) {
+		return c.work(challenge, try)
 	}
+
+	c.nonceTries = append(c.nonceTries, try)
+
+	return fmt.Sprintf("%s%s%s", challenge, pow.HashDelimiter, pow.Encode([]string{strconv.Itoa(try)}))
 }

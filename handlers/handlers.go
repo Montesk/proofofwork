@@ -2,7 +2,8 @@ package handlers
 
 import (
 	"github.com/Montesk/proofofwork/book"
-	"github.com/Montesk/proofofwork/pow"
+	"github.com/Montesk/proofofwork/pow/pow"
+	"github.com/Montesk/proofofwork/pow/service"
 	"github.com/Montesk/proofofwork/protocol"
 )
 
@@ -28,7 +29,7 @@ func (h *handlers) All() map[Controller]Handler {
 
 func New() Handlers {
 	h := &handlers{
-		pow:  pow.New(),
+		pow:  service.New(),
 		book: book.New(),
 		list: map[Controller]Handler{},
 	}

@@ -41,9 +41,9 @@ func (c *client[T]) Listen() error {
 		return err
 	}
 
-	for {
-		reader := bufio.NewReader(c.conn)
+	reader := bufio.NewReader(c.conn)
 
+	for {
 		raw, err := reader.ReadBytes('\n')
 		if clientDisconnected(err) {
 			return nil
@@ -66,7 +66,7 @@ func (c *client[T]) Listen() error {
 			continue
 		}
 
-		log.Printf("recieved message from client msg %v", msg)
+		log.Printf("recieved message from client msg %s", c.Addr())
 
 		c.requests <- msg
 	}
