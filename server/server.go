@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"git.ll-games.com/backend/daily/go1.17rc1/src/log"
 	"github.com/Montesk/proofofwork/client"
 	"github.com/Montesk/proofofwork/config"
 	"github.com/Montesk/proofofwork/errors"
@@ -10,6 +9,7 @@ import (
 	"github.com/Montesk/proofofwork/protocol"
 	"github.com/Montesk/proofofwork/router"
 	"github.com/Montesk/proofofwork/sessioner"
+	"log"
 	"net"
 	"time"
 )
