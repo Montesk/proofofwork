@@ -1,3 +1,8 @@
+### Requirements
+
+* docker
+* go 1.18 (local development)
+
 ### Task for Server Engineer
 
 Design and implement “Word of Wisdom” tcp server
@@ -16,7 +21,7 @@ Design and implement “Word of Wisdom” tcp server
 e.g.
 `docker run -p 9010:8001 proofofwork` runs the application on `9010` of the caller system
 
-full example `docker build -t proofofwork . && docker run -p 9010:8001 proofofwork`
+full example (run in the project directory) `docker build -t proofofwork . && docker run -p 9010:8001 proofofwork`
 
 ### Send TCP message
 `netcat 127.0.0.1 9010` establish connection
