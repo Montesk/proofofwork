@@ -22,14 +22,16 @@ type (
 		conn        net.Conn
 		readTimeout time.Duration
 		requests    chan T
+		errors      chan error
 	}
 )
 
-func New[T any](conn net.Conn, timeout time.Duration, requests chan T) Client {
+func New[T any](conn net.Conn, timeout time.Duration, requests chan T, errors chan error) Client {
 	return &client[T]{
 		conn:        conn,
 		readTimeout: timeout,
 		requests:    requests,
+		errors:      errors,
 	}
 }
 
@@ -60,6 +62,7 @@ func (c *client[T]) Listen() error {
 		err = json.Unmarshal(raw, &msg)
 		if err != nil {
 			log.Printf("error parse message from client %v", err)
+			c.errors <- err
 			continue
 		}
 

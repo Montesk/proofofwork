@@ -13,6 +13,11 @@ type (
 		Message interface{} `json:"message"`
 	}
 
+	Error struct {
+		Action string `json:"action"`
+		Error  string `json:"error"`
+	}
+
 	// Client -> Server
 	ProveController struct {
 		Suggest string `json:"suggest"`

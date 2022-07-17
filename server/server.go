@@ -79,9 +79,10 @@ func (s *server) Listen() error {
 			return fmt.Errorf("accept listener err %v", err)
 		}
 
-		requests := make(chan protocol.ClientMessage)
+		requestsChan := make(chan protocol.ClientMessage)
+		errorsChan := make(chan error)
 
-		cl := client.New[protocol.ClientMessage](conn, s.config.ReadTimeout(), requests)
+		cl := client.New[protocol.ClientMessage](conn, s.config.ReadTimeout(), requestsChan, errorsChan)
 
 		err = s.registerClient(cl, conn)
 		if err != nil {
@@ -93,7 +94,7 @@ func (s *server) Listen() error {
 
 		log.Printf("client: %s connected", cl.Addr())
 
-		go s.handle(cl, requests)
+		go s.handle(cl, requestsChan, errorsChan)
 	}
 }
 
@@ -105,7 +106,7 @@ func (s *server) registerClient(client client.Client, conn net.Conn) error {
 	return s.sessioner.Register(client, conn)
 }
 
-func (s *server) handle(cl client.Client, requests chan protocol.ClientMessage) {
+func (s *server) handle(cl client.Client, requests chan protocol.ClientMessage, errors chan error) {
 	disconnect := make(chan struct{})
 
 	defer func() {
@@ -113,12 +114,12 @@ func (s *server) handle(cl client.Client, requests chan protocol.ClientMessage) 
 		disconnect <- struct{}{}
 	}()
 
-	go s.handleRequests(cl, requests, disconnect)
+	go s.handleRequests(cl, requests, errors, disconnect)
 
 	cl.Listen()
 }
 
-func (s *server) handleRequests(cl client.Client, requests chan protocol.ClientMessage, disconnect chan struct{}) {
+func (s *server) handleRequests(cl client.Client, requests chan protocol.ClientMessage, errors chan error, disconnect chan struct{}) {
 	for {
 		select {
 		case req := <-requests:
@@ -132,6 +133,13 @@ func (s *server) handleRequests(cl client.Client, requests chan protocol.ClientM
 			if err != nil {
 				log.Printf("error handler message err: %v client %v", err, cl.Addr())
 			}
+		case errMsg := <-errors:
+			ses, err := s.sessioner.Session(cl.Addr())
+			if err != nil {
+				log.Printf("error sending error response to client %s err %v", cl.Addr(), err)
+			}
+
+			ses.SendErr(errMsg)
 		case <-disconnect:
 			err := s.sessioner.Unregister(cl)
 			if err != nil {
