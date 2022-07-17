@@ -137,6 +137,7 @@ func (s *server) handleRequests(cl client.Client, requests chan protocol.ClientM
 			ses, err := s.sessioner.Session(cl.Addr())
 			if err != nil {
 				log.Printf("error sending error response to client %s err %v", cl.Addr(), err)
+				continue
 			}
 
 			ses.SendErr(errMsg)
