@@ -8,6 +8,19 @@ Design and implement “Word of Wisdom” tcp server
 - After Prof Of Work verification, server should send one of the quotes from “word of wisdom” book or any other collection of the quotes
 - Docker file should be provided both for the server and for the client that solves the POW challenge
 
+### Build
+`docker build -t proofofwork .`
+
+### Run application
+`docker run -p <port>:8001 proofofwork`
+e.g.
+`docker run -p 9010:8001 proofofwork` runs the application on `9010` of the caller system
+
+### Send TCP message
+`netcat 127.0.0.1 9010` establish connection
+
+then use stubs listed below, protocol mutually json encoded 
+
 ### Message stubs
 #### Challenge controller
 ```json
