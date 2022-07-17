@@ -16,6 +16,8 @@ Design and implement “Word of Wisdom” tcp server
 e.g.
 `docker run -p 9010:8001 proofofwork` runs the application on `9010` of the caller system
 
+full example `docker build -t proofofwork . && docker run -p 9010:8001 proofofwork`
+
 ### Send TCP message
 `netcat 127.0.0.1 9010` establish connection
 
@@ -33,6 +35,10 @@ Example response
 ```
 
 #### Prove controller
+
+Prove suggest must append one of the number encoded in SHA-1, in range [1-10]
+Use [Online sha-1 encode tool](http://www.sha1-online.com/) for manual testing
+
 ```json
 { "controller": "prove", "message": { "suggest": "c1419d1224dba805efb4c0397db229db747a56ea|bb6f6c336e94819f99a64b8ab3b03161a298be43|c1419d1224dba805efb4c0397db229db747a56ea" } }
 ```

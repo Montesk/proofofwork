@@ -89,6 +89,8 @@ func (s *server) Listen() error {
 			continue
 		}
 
+		conn.Write([]byte(fmt.Sprintf("client %s connected \n", cl.Addr())))
+
 		log.Printf("client: %s connected", cl.Addr())
 
 		go s.handle(cl, requests)

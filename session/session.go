@@ -33,7 +33,7 @@ func (s *session) Send(action string, message interface{}) error {
 		return err
 	}
 
-	_, err = s.conn.Write(raw)
+	_, err = s.conn.Write(append(raw, '\n'))
 	if err != nil {
 		return err
 	}
