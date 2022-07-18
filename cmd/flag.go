@@ -21,7 +21,9 @@ type (
 var initialized bool
 var once = new(sync.Once)
 
-func NewFlagCmd(log logger.Logger) *flagCmd {
+func NewFlagCmd() *flagCmd {
+	log := logger.NewBase(logger.WarnLevel)
+
 	if initialized {
 		log.Warn("command args[] has been already initialized")
 	}

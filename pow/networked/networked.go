@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Montesk/proofofwork/config"
+	"github.com/Montesk/proofofwork/core/errors"
 	"github.com/Montesk/proofofwork/core/logger"
 	"github.com/Montesk/proofofwork/handlers"
 	"github.com/Montesk/proofofwork/pow/pow"
@@ -14,6 +15,10 @@ import (
 	"net"
 	"strconv"
 	"time"
+)
+
+const (
+	ErrClientNotConnected = errors.String("client not connected to server")
 )
 
 type (
@@ -30,21 +35,30 @@ func New(cfg config.Config, log logger.Logger) pow.POW {
 		log.Fatal(err)
 	}
 
+	cl := &networked{
+		config: cfg,
+		log:    log,
+	}
+
 	conn, err := net.DialTCP(cfg.Protocol(), nil, &net.TCPAddr{
 		Port: port,
 	})
 	if err != nil {
 		log.Errorf("client failed to establish connection %v", err)
+		return cl
 	}
 
-	return &networked{
-		config: cfg,
-		conn:   conn,
-		log:    log,
-	}
+	cl.conn = conn
+
+	return cl
 }
 
 func (n *networked) Generate(clientId string) (string, error) {
+	if n.conn == nil {
+		n.log.Errorf("client %s err %v", clientId, ErrClientNotConnected)
+		return "", ErrClientNotConnected
+	}
+
 	msg := protocol.ClientMessage{
 		Controller: handlers.ChallengeController,
 	}
@@ -73,6 +87,11 @@ func (n *networked) Generate(clientId string) (string, error) {
 }
 
 func (n *networked) Prove(clientId, hash string) (success bool) {
+	if n.conn == nil {
+		n.log.Errorf("client %s err %v", clientId, ErrClientNotConnected)
+		return
+	}
+
 	msg := protocol.ClientMessage{
 		Controller: handlers.ProveController,
 		Message:    []byte(fmt.Sprintf(`{ "suggest": "%s" }`, hash)),

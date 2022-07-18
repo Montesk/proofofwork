@@ -17,7 +17,7 @@ import (
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	args := cmd.NewFlagCmd(logger.NewBase(logger.WarnLevel))
+	args := cmd.NewFlagCmd()
 
 	log := logger.NewBase(args.LogLevel())
 
@@ -38,7 +38,8 @@ func main() {
 
 			challenge, err := connectedClient.Generate(strconv.Itoa(idx))
 			if err != nil {
-				log.Fatal(err)
+				log.Errorf("client %d failed to suggest challenge %v", idx, err)
+				return
 			}
 
 			cl := client.New(strconv.Itoa(idx), connectedClient)

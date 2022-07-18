@@ -15,15 +15,16 @@ import (
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	l := logger.NewBase(logger.InfoLevel)
-	args := cmd.NewFlagCmd(l)
+	args := cmd.NewFlagCmd()
 
-	err := Run(config.NewBase(args.Protocol(), fmt.Sprintf(":%d", args.Port()), args.ReadTimeout(), args.POWClients(), args.LogLevel()), l)
+	log := logger.NewBase(args.LogLevel())
+
+	err := Run(config.NewBase(args.Protocol(), fmt.Sprintf(":%d", args.Port()), args.ReadTimeout(), args.POWClients(), args.LogLevel()), log)
 	if err != nil {
-		l.Fatalf("server run error err: %v", err)
+		log.Fatalf("server run error err: %v", err)
 	}
 
-	l.Info("server shutdown")
+	log.Info("server shutdown")
 }
 
 func Run(cfg config.Config, log logger.Logger) error {
