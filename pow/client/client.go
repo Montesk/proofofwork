@@ -1,3 +1,5 @@
+// Package is the implementation of client with some work to suggest nonce parts
+
 package client
 
 import (
@@ -6,8 +8,6 @@ import (
 	"github.com/Montesk/proofofwork/pow/pow"
 	"strconv"
 )
-
-// mock implementation of client with some work to suggest nonce part of challenge in SHA-1
 
 const MaxTries = pow.NonceMax + 1
 

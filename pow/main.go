@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"github.com/Montesk/proofofwork/cmd"
 	"github.com/Montesk/proofofwork/config"
 	"github.com/Montesk/proofofwork/pow/client"
-	"github.com/Montesk/proofofwork/pow/server"
+	"github.com/Montesk/proofofwork/pow/networked"
 	"log"
 	"math/rand"
 	"strconv"
@@ -11,20 +13,18 @@ import (
 	"time"
 )
 
-const (
-	clientsNum = 100
-)
-
 // network based suggestions by clients
 func main() {
 	rand.Seed(time.Now().UnixNano())
+
+	settings := cmd.NewFlagCmd()
 
 	log.Printf("Running clients for proof of work...")
 
 	done := make(chan struct{})
 
 	wg := new(sync.WaitGroup)
-	for i := 0; i < clientsNum; i++ {
+	for i := 0; i < settings.POWClients(); i++ {
 		go func(idx int) {
 			wg.Add(1)
 			defer wg.Done()
@@ -32,7 +32,7 @@ func main() {
 			log.Printf("client N %d connected", idx)
 
 			// server
-			connectedClient := server.New(config.New("tcp", "8001", 0))
+			connectedClient := networked.New(config.NewMockConfig(settings.Protocol(), fmt.Sprintf("%d", settings.Port()), settings.ReadTimeout(), settings.POWClients()))
 
 			challenge, err := connectedClient.Generate(strconv.Itoa(idx))
 			if err != nil {

@@ -11,12 +11,9 @@ import (
 	"github.com/Montesk/proofofwork/sessioner"
 	"log"
 	"net"
-	"time"
 )
 
 const (
-	DefaultReadTimeout = 10 * time.Minute
-
 	ErrServerNotReady = errors.String("server not ready")
 )
 

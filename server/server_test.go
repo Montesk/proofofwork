@@ -33,7 +33,11 @@ func (m mockConfig) Protocol() string {
 }
 
 func (m mockConfig) ReadTimeout() time.Duration {
-	return DefaultReadTimeout
+	return 10 * time.Minute
+}
+
+func (m mockConfig) POWClients() int {
+	return 0
 }
 
 func TestServer_Run(t *testing.T) {

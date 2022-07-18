@@ -1,4 +1,6 @@
-package server
+// Implementation of client with TCP read/write generate and proof
+
+package networked
 
 import (
 	"bufio"
@@ -15,7 +17,7 @@ import (
 )
 
 type (
-	server struct {
+	networked struct {
 		config config.Config
 		conn   net.Conn
 	}
@@ -35,25 +37,25 @@ func New(cfg config.Config) pow.POW {
 		log.Fatal(err)
 	}
 
-	return &server{
+	return &networked{
 		config: cfg,
 		conn:   conn,
 	}
 }
 
-func (s *server) Generate(clientId string) (string, error) {
+func (n *networked) Generate(clientId string) (string, error) {
 	msg := protocol.ClientMessage{
 		Controller: handlers.ChallengeController,
 	}
 
 	raw, _ := json.Marshal(msg)
 
-	_, err := s.conn.Write(append(raw, '\n'))
+	_, err := n.conn.Write(append(raw, '\n'))
 	if err != nil {
 		log.Printf("client %s write error %v", clientId, err)
 	}
 
-	result, err := waitForMessage[protocol.ChallengeAction](s.conn)
+	result, err := waitForMessage[protocol.ChallengeAction](n.conn)
 	if err != nil {
 		return "", err
 	}
@@ -63,7 +65,7 @@ func (s *server) Generate(clientId string) (string, error) {
 	return result.Challenge, err
 }
 
-func (s *server) Prove(clientId, hash string) (success bool) {
+func (n *networked) Prove(clientId, hash string) (success bool) {
 	msg := protocol.ClientMessage{
 		Controller: handlers.ProveController,
 		Message:    []byte(fmt.Sprintf(`{ "suggest": "%s" }`, hash)),
@@ -71,18 +73,18 @@ func (s *server) Prove(clientId, hash string) (success bool) {
 
 	raw, _ := json.Marshal(msg)
 
-	_, err := s.conn.Write(append(raw, '\n'))
+	_, err := n.conn.Write(append(raw, '\n'))
 	if err != nil {
 		log.Printf("client %s write error %v", clientId, err)
 	}
 
-	result, err := waitForMessage[protocol.ProveAction](s.conn)
+	result, err := waitForMessage[protocol.ProveAction](n.conn)
 	if err != nil {
 		return false
 	}
 
 	if result.Success {
-		log.Printf("client %s N %s succesfully decode message: %s", clientId, s.conn.LocalAddr(), result.Message)
+		log.Printf("client %s N %s succesfully decode message: %s", clientId, n.conn.LocalAddr(), result.Message)
 		// :WARING: can't close connection here as new connection can take the same system port if system runs concurrently
 		// :NOTE: connection in the end will be closed by the server
 	}

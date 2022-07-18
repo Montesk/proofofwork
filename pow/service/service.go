@@ -1,3 +1,5 @@
+// Package that provides implementation of mem-cache POW proof and generator mechanism
+
 package service
 
 import (

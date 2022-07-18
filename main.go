@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"github.com/Montesk/proofofwork/cmd"
 	"github.com/Montesk/proofofwork/config"
 	"github.com/Montesk/proofofwork/router"
 	"github.com/Montesk/proofofwork/server"
@@ -13,7 +15,9 @@ import (
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	err := Run(config.New("tcp", ":8001", server.DefaultReadTimeout))
+	settings := cmd.NewFlagCmd()
+
+	err := Run(config.NewMockConfig(settings.Protocol(), fmt.Sprintf(":%d", settings.Port()), settings.ReadTimeout(), settings.POWClients()))
 	if err != nil {
 		log.Fatalf("server run error err: %v", err)
 	}
