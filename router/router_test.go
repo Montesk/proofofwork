@@ -4,26 +4,25 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/Montesk/proofofwork/core/logger"
-	"github.com/Montesk/proofofwork/handlers"
 	"github.com/Montesk/proofofwork/session"
 	"testing"
 	"time"
 )
 
 func TestRouter_Handle(t *testing.T) {
-	t.Run("handle registered handler called - no error", func(t *testing.T) {
+	t.Run("handle registered route called - no error", func(t *testing.T) {
 		name := "handler_name"
 
-		rt := New(logger.NewNull())
-		rt.Register(name, handlers.BuildRoute[any](func(ses session.Session, _ any) {}))
+		rt := NewControllers(logger.NewNull())
+		rt.Register(name, BuildRoute[any](func(ses session.Session, _ any) {}))
 
 		err := rt.Handle(name, session.Null(), nil)
 		if err != nil {
-			t.Errorf("expect no error on handler call got err %v", err)
+			t.Errorf("expect no error on route call got err %v", err)
 		}
 	})
 
-	t.Run("handle method calls registered handler", func(t *testing.T) {
+	t.Run("handle method calls registered route", func(t *testing.T) {
 		got := make(chan struct{})
 
 		name := "handler_name"
@@ -31,9 +30,9 @@ func TestRouter_Handle(t *testing.T) {
 			got <- struct{}{}
 		}
 
-		rt := New(logger.NewNull())
+		rt := NewControllers(logger.NewNull())
 
-		rt.Register(name, handlers.BuildRoute[any](handler))
+		rt.Register(name, BuildRoute[any](handler))
 
 		go rt.Handle(name, session.Null(), nil)
 
@@ -42,13 +41,13 @@ func TestRouter_Handle(t *testing.T) {
 			case <-got:
 				return // pass
 			case <-time.After(1 * time.Second):
-				t.Error("expect handler was called")
+				t.Error("expect route was called")
 				return
 			}
 		}
 	})
 
-	t.Run("handler pass json message", func(t *testing.T) {
+	t.Run("route pass json message", func(t *testing.T) {
 		got := make(chan struct {
 			value string
 		})
@@ -56,7 +55,7 @@ func TestRouter_Handle(t *testing.T) {
 		msg := struct {
 			value string
 		}{
-			value: "message in handler",
+			value: "message in route",
 		}
 
 		name := "handler_name"
@@ -64,9 +63,9 @@ func TestRouter_Handle(t *testing.T) {
 			got <- msg
 		}
 
-		rt := New(logger.NewNull())
+		rt := NewControllers(logger.NewNull())
 
-		rt.Register(name, handlers.BuildRoute[any](handler))
+		rt.Register(name, BuildRoute[any](handler))
 
 		raw, _ := json.Marshal(msg)
 
@@ -76,25 +75,25 @@ func TestRouter_Handle(t *testing.T) {
 			select {
 			case gotMsg := <-got:
 				if msg != gotMsg {
-					t.Errorf("expect message from handler %v got %v", msg, gotMsg)
+					t.Errorf("expect message from route %v got %v", msg, gotMsg)
 					return
 				}
 				return // pass
 			case <-time.After(1 * time.Second):
-				t.Error("expect handler was called")
+				t.Error("expect route was called")
 				return
 			}
 		}
 	})
 
-	t.Run("handle unregistered handler - expect error", func(t *testing.T) {
+	t.Run("handle unregistered route - expect error", func(t *testing.T) {
 		name := "handler_name"
 
-		rt := New(logger.NewNull())
+		rt := NewControllers(logger.NewNull())
 
 		err := rt.Handle(name, session.Null(), nil)
 		if err == nil {
-			t.Errorf("expect no error on handler call got err %v", err)
+			t.Errorf("expect no error on route call got err %v", err)
 		} else {
 			if !errors.Is(err, ErrRouteNotRegistered) {
 				t.Errorf("expect %v err got %v", ErrRouteNotRegistered, err)
@@ -102,16 +101,16 @@ func TestRouter_Handle(t *testing.T) {
 		}
 	})
 
-	t.Run("another handler was registered, called unregistered - expect error", func(t *testing.T) {
+	t.Run("another route was registered, called unregistered - expect error", func(t *testing.T) {
 		name := "handler_name"
 
-		rt := New(logger.NewNull())
+		rt := NewControllers(logger.NewNull())
 
-		rt.Register("another_route", handlers.BuildRoute[any](func(ses session.Session, _ any) {}))
+		rt.Register("another_route", BuildRoute[any](func(ses session.Session, _ any) {}))
 
 		err := rt.Handle(name, session.Null(), nil)
 		if err == nil {
-			t.Errorf("expect no error on handler call got err %v", err)
+			t.Errorf("expect no error on route call got err %v", err)
 		} else {
 			if !errors.Is(err, ErrRouteNotRegistered) {
 				t.Errorf("expect %v err got %v", ErrRouteNotRegistered, err)

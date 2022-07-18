@@ -27,7 +27,7 @@ func main() {
 }
 
 func Run(cfg config.Config, log logger.Logger) error {
-	srv := server.New(cfg, router.New(log), sessioner.New(), log)
+	srv := server.New(cfg, router.NewControllers(log), sessioner.New(), log)
 
 	err := srv.Run()
 	if err != nil {

@@ -65,7 +65,7 @@ func (s *sessioner) Register(cl client.Client, conn net.Conn) error {
 		session session.Session
 	}{
 		client:  cl,
-		session: session.New(cl.Addr(), conn),
+		session: session.NewNetworked(cl.Addr(), conn),
 	}
 
 	return nil
