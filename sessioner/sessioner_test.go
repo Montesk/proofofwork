@@ -51,7 +51,7 @@ func (m mockConn) SetWriteDeadline(t time.Time) error {
 }
 
 func TestSessioner_Register(t *testing.T) {
-	ss := New()
+	ss := NewMemory()
 
 	addr := "127.0.0.1:83337"
 
@@ -63,7 +63,7 @@ func TestSessioner_Register(t *testing.T) {
 
 func TestSessioner_Unregister(t *testing.T) {
 	t.Run("unregister ok", func(t *testing.T) {
-		ss := New()
+		ss := NewMemory()
 
 		addr := "127.0.0.1:83337"
 
@@ -81,7 +81,7 @@ func TestSessioner_Unregister(t *testing.T) {
 	})
 
 	t.Run("try to unregister non-existing client", func(t *testing.T) {
-		ss := New()
+		ss := NewMemory()
 
 		addr := "127.0.0.1:83337"
 
@@ -103,7 +103,7 @@ func TestSessioner_Unregister(t *testing.T) {
 
 func TestSessioner_Session(t *testing.T) {
 	t.Run("session found ok", func(t *testing.T) {
-		ss := New()
+		ss := NewMemory()
 
 		addr := "127.0.0.1:83337"
 
@@ -125,7 +125,7 @@ func TestSessioner_Session(t *testing.T) {
 	})
 
 	t.Run("client not found", func(t *testing.T) {
-		ss := New()
+		ss := NewMemory()
 
 		addr := "127.0.0.1:83337"
 
