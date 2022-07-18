@@ -1,3 +1,5 @@
+// Package handlers provides registered API endpoints for clients
+
 package handlers
 
 import (
