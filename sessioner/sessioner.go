@@ -2,7 +2,7 @@ package sessioner
 
 import (
 	"github.com/Montesk/proofofwork/client"
-	"github.com/Montesk/proofofwork/errors"
+	"github.com/Montesk/proofofwork/core/errors"
 	"github.com/Montesk/proofofwork/session"
 	"net"
 	"sync"

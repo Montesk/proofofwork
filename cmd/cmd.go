@@ -2,7 +2,10 @@
 
 package cmd
 
-import "time"
+import (
+	"github.com/Montesk/proofofwork/core/logger"
+	"time"
+)
 
 type (
 	Cmd interface {
@@ -10,5 +13,6 @@ type (
 		Protocol() string
 		ReadTimeout() time.Duration
 		POWClients() (number int)
+		LogLevel() logger.Level
 	}
 )

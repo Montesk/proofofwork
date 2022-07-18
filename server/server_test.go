@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/Montesk/proofofwork/config"
+	"github.com/Montesk/proofofwork/core/logger"
 	"github.com/Montesk/proofofwork/router"
 	"github.com/Montesk/proofofwork/sessioner"
 	"testing"
@@ -40,8 +41,12 @@ func (m mockConfig) POWClients() int {
 	return 0
 }
 
+func (m mockConfig) LogLevel() logger.Level {
+	return logger.ErrorLevel
+}
+
 func TestServer_Run(t *testing.T) {
-	srv := New(newMockConfig(":8010"), router.Null(), sessioner.New())
+	srv := New(newMockConfig(":8010"), router.Null(), sessioner.New(), logger.NewNull())
 
 	err := srv.Run()
 	if err != nil {
@@ -52,7 +57,7 @@ func TestServer_Run(t *testing.T) {
 }
 
 func TestServer_Listen(t *testing.T) {
-	srv := New(newMockConfig(":8011"), router.Null(), sessioner.New())
+	srv := New(newMockConfig(":8011"), router.Null(), sessioner.New(), logger.NewNull())
 
 	err := srv.Run()
 	if err != nil {
@@ -79,7 +84,7 @@ func TestServer_Listen(t *testing.T) {
 }
 
 func TestServer_Close(t *testing.T) {
-	srv := New(newMockConfig(":8012"), router.Null(), sessioner.New())
+	srv := New(newMockConfig(":8012"), router.Null(), sessioner.New(), logger.NewNull())
 
 	err := srv.Run()
 	if err != nil {

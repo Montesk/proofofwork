@@ -3,7 +3,6 @@ package handlers
 import (
 	"github.com/Montesk/proofofwork/protocol"
 	"github.com/Montesk/proofofwork/session"
-	"log"
 )
 
 const (
@@ -12,7 +11,7 @@ const (
 )
 
 func (h *handlers) ProveHandler(ses session.Session, msg protocol.ProveController) {
-	log.Printf("recieved prove attempt from client %s msg %s", ses.ClientId(), msg.Suggest)
+	h.log.Debugf("received prove attempt from client %s msg %s", ses.ClientId(), msg.Suggest)
 
 	success := h.pow.Prove(ses.ClientId(), msg.Suggest)
 
@@ -30,7 +29,7 @@ func (h *handlers) ProveHandler(ses session.Session, msg protocol.ProveControlle
 	}
 
 	if err != nil {
-		log.Print("error sending message to client ", err)
+		h.log.Errorf("error sending message to client err %v", err)
 	}
 
 }

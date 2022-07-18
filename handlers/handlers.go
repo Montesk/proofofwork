@@ -2,8 +2,9 @@ package handlers
 
 import (
 	"github.com/Montesk/proofofwork/book"
+	"github.com/Montesk/proofofwork/core/logger"
 	"github.com/Montesk/proofofwork/pow/pow"
-	"github.com/Montesk/proofofwork/pow/service"
+	powservice "github.com/Montesk/proofofwork/pow/service"
 	"github.com/Montesk/proofofwork/protocol"
 )
 
@@ -20,6 +21,7 @@ type (
 		pow  pow.POW
 		book book.Book
 		list map[Controller]Handler
+		log  logger.Logger
 	}
 )
 
@@ -27,11 +29,12 @@ func (h *handlers) All() map[Controller]Handler {
 	return h.list
 }
 
-func New() Handlers {
+func New(log logger.Logger) Handlers {
 	h := &handlers{
-		pow:  service.New(),
-		book: book.New(),
+		pow:  powservice.New(),
+		book: book.NewMemoryBook(),
 		list: map[Controller]Handler{},
+		log:  log,
 	}
 
 	h.setupRoutes()

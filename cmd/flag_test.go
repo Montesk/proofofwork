@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/Montesk/proofofwork/core/logger"
 	"os"
 	"testing"
 	"time"
@@ -16,7 +17,7 @@ func TestCmdFlags(t *testing.T) {
 	setArg("protocol", expectProtocol)
 	setArg("timeout", expectTimeout)
 
-	flag := NewFlagCmd()
+	flag := NewFlagCmd(logger.NewDebug())
 
 	if flag.Port() != expectPort {
 		t.Errorf("expect read port from program args %d got %d", expectPort, flag.Port())

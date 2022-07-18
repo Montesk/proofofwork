@@ -4,8 +4,8 @@ import (
 	"bufio"
 	"encoding/json"
 	"errors"
+	"github.com/Montesk/proofofwork/core/logger"
 	"io"
-	"log"
 	"net"
 	"time"
 )
@@ -23,21 +23,24 @@ type (
 		readTimeout time.Duration
 		requests    chan T
 		errors      chan error
+		log         logger.Logger
 	}
 )
 
-func New[T any](conn net.Conn, timeout time.Duration, requests chan T, errors chan error) Client {
+func New[T any](conn net.Conn, timeout time.Duration, requests chan T, errors chan error, log logger.Logger) Client {
 	return &client[T]{
 		conn:        conn,
 		readTimeout: timeout,
 		requests:    requests,
 		errors:      errors,
+		log:         log,
 	}
 }
 
 func (c *client[T]) Listen() error {
 	err := c.conn.SetReadDeadline(time.Now().Add(c.readTimeout))
 	if err != nil {
+		c.log.Errorf("error set deadline for client %v err %v", c.Addr(), err)
 		return err
 	}
 
@@ -48,12 +51,13 @@ func (c *client[T]) Listen() error {
 		if clientDisconnected(err) {
 			return nil
 		} else if err != nil {
-			log.Printf("error parse message from client %v", err)
+			c.log.Errorf("error parse message from client %v err %v", c.Addr(), err)
 			continue
 		}
 
 		err = c.conn.SetReadDeadline(time.Now().Add(c.readTimeout))
 		if err != nil {
+			c.log.Errorf("error set deadline for client %v err %v", c.Addr(), err)
 			return err
 		}
 
@@ -61,19 +65,19 @@ func (c *client[T]) Listen() error {
 
 		err = json.Unmarshal(raw, &msg)
 		if err != nil {
-			log.Printf("error parse message from client %v", err)
+			c.log.Errorf("parse message from client err %v", err)
 			c.errors <- err
 			continue
 		}
 
-		log.Printf("recieved message from client msg %s", c.Addr())
+		c.log.Debugf("received message from client msg %s", c.Addr())
 
 		c.requests <- msg
 	}
 }
 
 func (c *client[T]) Close() error {
-	log.Printf("client connection closed %s", c.Addr())
+	c.log.Debugf("client connection closed %s", c.Addr())
 	return c.conn.Close()
 }
 

@@ -4,7 +4,7 @@ package service
 
 import (
 	"fmt"
-	"github.com/Montesk/proofofwork/errors"
+	"github.com/Montesk/proofofwork/core/errors"
 	"github.com/Montesk/proofofwork/pow/pow"
 	"math/rand"
 	"strings"

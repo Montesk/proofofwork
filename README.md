@@ -37,6 +37,7 @@ full example (run in the project directory)
 -protocol=tcp // server application protocol (tcp is the only available option for now)
 -timeout=600 // timeout in seconds before client gets disconnected by server
 -clients=100 // number of clients participating in proof of work challenge in pow package integration tests
+-log_level=debug // system wide logging level
 ```
 
 ---

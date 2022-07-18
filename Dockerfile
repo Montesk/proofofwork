@@ -2,11 +2,9 @@ FROM golang:1.18.4
 
 WORKDIR testdir
 
-COPY go.mod .
+COPY . .
 
 RUN go mod download && go mod verify
-
-COPY . .
 
 RUN go test ./...
 

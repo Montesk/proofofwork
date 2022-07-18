@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"github.com/Montesk/proofofwork/client"
 	"github.com/Montesk/proofofwork/config"
-	"github.com/Montesk/proofofwork/errors"
+	"github.com/Montesk/proofofwork/core/errors"
+	"github.com/Montesk/proofofwork/core/logger"
 	"github.com/Montesk/proofofwork/handlers"
 	"github.com/Montesk/proofofwork/protocol"
 	"github.com/Montesk/proofofwork/router"
 	"github.com/Montesk/proofofwork/sessioner"
-	"log"
 	"net"
 )
 
@@ -29,14 +29,16 @@ type (
 		router    router.Router
 		sessioner sessioner.Sessioner
 		listener  net.Listener
+		log       logger.Logger
 	}
 )
 
-func New(cfg config.Config, rt router.Router, ss sessioner.Sessioner) *server {
+func New(cfg config.Config, rt router.Router, ss sessioner.Sessioner, log logger.Logger) *server {
 	return &server{
 		sessioner: ss,
 		config:    cfg,
 		router:    rt,
+		log:       log,
 	}
 }
 
@@ -45,8 +47,6 @@ func (s *server) Run() error {
 	if err != nil {
 		return err
 	}
-
-	log.Print("server started port: ", s.config.Port())
 
 	s.listener = listener
 
@@ -60,7 +60,7 @@ func (s *server) Close() error {
 		return ErrServerNotReady
 	}
 
-	log.Printf("server %s closed", s.config.Port())
+	s.log.Infof("server %s closed", s.config.Port())
 
 	return s.listener.Close()
 }
@@ -79,17 +79,17 @@ func (s *server) Listen() error {
 		requestsChan := make(chan protocol.ClientMessage)
 		errorsChan := make(chan error)
 
-		cl := client.New[protocol.ClientMessage](conn, s.config.ReadTimeout(), requestsChan, errorsChan)
+		cl := client.New[protocol.ClientMessage](conn, s.config.ReadTimeout(), requestsChan, errorsChan, s.log)
 
 		err = s.registerClient(cl, conn)
 		if err != nil {
-			log.Printf("can't register client %s err %v", cl.Addr(), err)
+			s.log.Errorf("can't register client %s err %v", cl.Addr(), err)
 			continue
 		}
 
 		conn.Write([]byte(fmt.Sprintf("client %s connected \n", cl.Addr())))
 
-		log.Printf("client: %s connected", cl.Addr())
+		s.log.Debugf("client: %s connected", cl.Addr())
 
 		go s.handle(cl, requestsChan, errorsChan)
 	}
@@ -122,18 +122,18 @@ func (s *server) handleRequests(cl client.Client, requests chan protocol.ClientM
 		case req := <-requests:
 			ses, err := s.sessioner.Session(cl.Addr())
 			if err != nil {
-				log.Printf("error retrieve client session: %v client %v", err, cl.Addr())
+				s.log.Errorf("error retrieve client session: %v client %v", err, cl.Addr())
 				continue
 			}
 
 			err = s.router.Handle(req.Controller, ses, req.Message)
 			if err != nil {
-				log.Printf("error handler message err: %v client %v", err, cl.Addr())
+				s.log.Errorf("handler message err: %v client %v", err, cl.Addr())
 			}
 		case errMsg := <-errors:
 			ses, err := s.sessioner.Session(cl.Addr())
 			if err != nil {
-				log.Printf("error sending error response to client %s err %v", cl.Addr(), err)
+				s.log.Errorf("sending error response to client %s err %v", cl.Addr(), err)
 				continue
 			}
 
@@ -141,7 +141,7 @@ func (s *server) handleRequests(cl client.Client, requests chan protocol.ClientM
 		case <-disconnect:
 			err := s.sessioner.Unregister(cl)
 			if err != nil {
-				log.Printf("error client unregister err: %v client %v", err, cl.Addr())
+				s.log.Errorf("client unregister err: %v client %v", err, cl.Addr())
 			}
 
 			return
@@ -150,7 +150,7 @@ func (s *server) handleRequests(cl client.Client, requests chan protocol.ClientM
 }
 
 func (s *server) registerHandlers() {
-	h := handlers.New()
+	h := handlers.New(s.log)
 
 	for controller, handler := range h.All() {
 		s.router.Register(string(controller), handler)

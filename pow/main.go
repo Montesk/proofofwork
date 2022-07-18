@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/Montesk/proofofwork/cmd"
 	"github.com/Montesk/proofofwork/config"
+	"github.com/Montesk/proofofwork/core/logger"
 	"github.com/Montesk/proofofwork/pow/client"
 	"github.com/Montesk/proofofwork/pow/networked"
-	"log"
 	"math/rand"
 	"strconv"
 	"sync"
@@ -17,22 +17,24 @@ import (
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	settings := cmd.NewFlagCmd()
+	args := cmd.NewFlagCmd(logger.NewBase(logger.WarnLevel))
+
+	log := logger.NewBase(args.LogLevel())
 
 	log.Printf("Running clients for proof of work...")
 
 	done := make(chan struct{})
 
 	wg := new(sync.WaitGroup)
-	for i := 0; i < settings.POWClients(); i++ {
+	for i := 0; i < args.POWClients(); i++ {
 		go func(idx int) {
 			wg.Add(1)
 			defer wg.Done()
 
-			log.Printf("client N %d connected", idx)
+			log.Debugf("client N %d connected", idx)
 
 			// server
-			connectedClient := networked.New(config.NewMockConfig(settings.Protocol(), fmt.Sprintf("%d", settings.Port()), settings.ReadTimeout(), settings.POWClients()))
+			connectedClient := networked.New(config.NewBase(args.Protocol(), fmt.Sprintf("%d", args.Port()), args.ReadTimeout(), args.POWClients(), args.LogLevel()), log)
 
 			challenge, err := connectedClient.Generate(strconv.Itoa(idx))
 			if err != nil {
@@ -43,9 +45,9 @@ func main() {
 
 			tries, err := cl.Suggest(challenge, 0)
 			if err != nil {
-				log.Printf("client %d failed to suggest challenge %v tries %d", idx, err, tries)
+				log.Errorf("client %d failed to suggest challenge %v tries %d", idx, err, tries)
 			} else {
-				log.Printf("client %d suggested challenge in %d tries", idx, tries)
+				log.Infof("client %d suggested challenge in %d tries", idx, tries)
 			}
 
 		}(i)

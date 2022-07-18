@@ -4,7 +4,8 @@ package client
 
 import (
 	"fmt"
-	"github.com/Montesk/proofofwork/errors"
+	"github.com/Montesk/proofofwork/core/errors"
+	"github.com/Montesk/proofofwork/core/slice"
 	"github.com/Montesk/proofofwork/pow/pow"
 	"strconv"
 )
@@ -52,7 +53,7 @@ func (c *client) Suggest(challenge string, tries int) (int, error) {
 }
 
 func (c *client) work(challenge string, try int) (suggest string) {
-	if pow.SliceContains[int](try, c.nonceTries) {
+	if slice.Contains[int](try, c.nonceTries) {
 		return c.work(challenge, try)
 	}
 

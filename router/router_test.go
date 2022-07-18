@@ -3,6 +3,7 @@ package router
 import (
 	"encoding/json"
 	"errors"
+	"github.com/Montesk/proofofwork/core/logger"
 	"github.com/Montesk/proofofwork/handlers"
 	"github.com/Montesk/proofofwork/session"
 	"testing"
@@ -13,7 +14,7 @@ func TestRouter_Handle(t *testing.T) {
 	t.Run("handle registered handler called - no error", func(t *testing.T) {
 		name := "handler_name"
 
-		rt := New()
+		rt := New(logger.NewNull())
 		rt.Register(name, handlers.BuildRoute[any](func(ses session.Session, _ any) {}))
 
 		err := rt.Handle(name, session.Null(), nil)
@@ -30,7 +31,7 @@ func TestRouter_Handle(t *testing.T) {
 			got <- struct{}{}
 		}
 
-		rt := New()
+		rt := New(logger.NewNull())
 
 		rt.Register(name, handlers.BuildRoute[any](handler))
 
@@ -63,7 +64,7 @@ func TestRouter_Handle(t *testing.T) {
 			got <- msg
 		}
 
-		rt := New()
+		rt := New(logger.NewNull())
 
 		rt.Register(name, handlers.BuildRoute[any](handler))
 
@@ -89,7 +90,7 @@ func TestRouter_Handle(t *testing.T) {
 	t.Run("handle unregistered handler - expect error", func(t *testing.T) {
 		name := "handler_name"
 
-		rt := New()
+		rt := New(logger.NewNull())
 
 		err := rt.Handle(name, session.Null(), nil)
 		if err == nil {
@@ -104,7 +105,7 @@ func TestRouter_Handle(t *testing.T) {
 	t.Run("another handler was registered, called unregistered - expect error", func(t *testing.T) {
 		name := "handler_name"
 
-		rt := New()
+		rt := New(logger.NewNull())
 
 		rt.Register("another_route", handlers.BuildRoute[any](func(ses session.Session, _ any) {}))
 
