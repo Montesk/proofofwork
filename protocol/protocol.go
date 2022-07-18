@@ -1,3 +1,5 @@
+// Package provides description of DTO objects
+
 package protocol
 
 import "encoding/json"
