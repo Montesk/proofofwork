@@ -11,25 +11,24 @@ const (
 )
 
 func (h *handlers) ProveHandler(ses session.Session, msg protocol.ProveController) {
-	h.log.Debugf("received prove attempt from client %s msg %s", ses.ClientId(), msg.Suggest)
-
 	success := h.pow.Prove(ses.ClientId(), msg.Suggest)
 
+	h.log.Debugf("received prove attempt from client %s msg %s", ses.ClientId(), msg.Suggest)
+
 	var err error
-	if !success {
-		err = ses.Send(ProveAction, protocol.ProveAction{
-			Success: false,
-			Message: "try again",
-		})
-	} else {
+	if success {
 		err = ses.Send(ProveAction, protocol.ProveAction{
 			Success: true,
 			Message: h.book.RandomQuote(),
 		})
+	} else {
+		err = ses.Send(ProveAction, protocol.ProveAction{
+			Success: false,
+			Message: "try again",
+		})
 	}
 
 	if err != nil {
-		h.log.Errorf("error sending message to client err %v", err)
+		h.log.Errorf("error sending message to client %s err %v", ses.ClientId(), err)
 	}
-
 }
