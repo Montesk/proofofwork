@@ -45,8 +45,13 @@ func (m mockConfig) LogLevel() logger.Level {
 	return logger.ErrorLevel
 }
 
+func newMockServer(port string) Server {
+	ch := make(chan struct{})
+	return New(newMockConfig(port), router.NewNull(), sessioner.NewMemory(ch), ch, logger.NewNull())
+}
+
 func TestServer_Run(t *testing.T) {
-	srv := New(newMockConfig(":8010"), router.NewNull(), sessioner.NewMemory(), logger.NewNull())
+	srv := newMockServer(":8010")
 
 	err := srv.Run()
 	if err != nil {
@@ -57,7 +62,7 @@ func TestServer_Run(t *testing.T) {
 }
 
 func TestServer_Listen(t *testing.T) {
-	srv := New(newMockConfig(":8011"), router.NewNull(), sessioner.NewMemory(), logger.NewNull())
+	srv := newMockServer(":8011")
 
 	err := srv.Run()
 	if err != nil {
@@ -84,7 +89,7 @@ func TestServer_Listen(t *testing.T) {
 }
 
 func TestServer_Close(t *testing.T) {
-	srv := New(newMockConfig(":8012"), router.NewNull(), sessioner.NewMemory(), logger.NewNull())
+	srv := newMockServer(":8012")
 
 	err := srv.Run()
 	if err != nil {

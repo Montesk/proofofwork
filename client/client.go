@@ -87,5 +87,5 @@ func (c *client[T]) Addr() string {
 
 func clientDisconnected(got error) bool {
 	var err net.Error
-	return errors.Is(got, io.EOF) || (errors.As(got, &err) && err.Timeout())
+	return errors.Is(got, io.EOF) || errors.Is(got, net.ErrClosed) || (errors.As(got, &err) && err.Timeout())
 }

@@ -5,9 +5,15 @@ package sessioner
 import (
 	"github.com/Montesk/proofofwork/client"
 	"github.com/Montesk/proofofwork/core/errors"
+	"github.com/Montesk/proofofwork/protocol"
 	"github.com/Montesk/proofofwork/session"
 	"net"
 	"sync"
+	"time"
+)
+
+const (
+	serverDisconnectTimeout = 7 * time.Second
 )
 
 const (
@@ -16,22 +22,25 @@ const (
 )
 
 type (
+	clientId = string
+
+	online struct {
+		client  client.Client
+		session session.Session
+	}
+
 	memory struct {
 		mu      *sync.Mutex
-		storage map[string]struct {
-			client  client.Client
-			session session.Session
-		}
+		storage map[clientId]online
+		done    chan struct{}
 	}
 )
 
-func NewMemory() Sessioner {
+func NewMemory(done chan struct{}) Sessioner {
 	return &memory{
-		mu: new(sync.Mutex),
-		storage: map[string]struct {
-			client  client.Client
-			session session.Session
-		}{},
+		mu:      new(sync.Mutex),
+		storage: map[clientId]online{},
+		done:    done,
 	}
 }
 
@@ -79,4 +88,27 @@ func (s *memory) Unregister(client client.Client) error {
 	delete(s.storage, client.Addr())
 
 	return nil
+}
+
+func (s *memory) Close() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	wg := new(sync.WaitGroup)
+	for _, cl := range s.storage {
+		wg.Add(1)
+		go func(cl online) {
+			// client information message err is not relevant to handle or logging this error
+			_ = cl.session.Send("info", protocol.NotifyServerCloseAction{Info: "server will be closed shortly"})
+
+			time.Sleep(serverDisconnectTimeout)
+
+			_ = cl.client.Close()
+
+			wg.Done()
+		}(cl)
+	}
+	wg.Wait()
+
+	close(s.done)
 }

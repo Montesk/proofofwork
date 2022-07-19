@@ -13,5 +13,6 @@ type (
 		Session(clientId string) (session.Session, error)
 		Register(client client.Client, conn net.Conn) error
 		Unregister(client client.Client) error
+		Close()
 	}
 )

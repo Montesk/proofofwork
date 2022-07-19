@@ -34,4 +34,8 @@ type (
 		Success bool
 		Message string
 	}
+
+	NotifyServerCloseAction struct {
+		Info string `json:"info"`
+	}
 )

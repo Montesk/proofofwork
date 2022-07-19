@@ -29,15 +29,17 @@ type (
 		router    router.Router
 		sessioner sessioner.Sessioner
 		listener  net.Listener
+		shutdown  chan struct{}
 		log       logger.Logger
 	}
 )
 
-func New(cfg config.Config, rt router.Router, ss sessioner.Sessioner, log logger.Logger) *server {
+func New(cfg config.Config, rt router.Router, ss sessioner.Sessioner, shutdown chan struct{}, log logger.Logger) *server {
 	return &server{
 		sessioner: ss,
 		config:    cfg,
 		router:    rt,
+		shutdown:  shutdown,
 		log:       log,
 	}
 }
@@ -70,10 +72,22 @@ func (s *server) Listen() error {
 		return ErrServerNotReady
 	}
 
+	go s.listen()
+
+	<-s.shutdown
+
+	s.log.Info("received application shutdown signal")
+	s.log.Info("tcp server closed for new connections")
+
+	return nil
+}
+
+func (s *server) listen() {
 	for {
 		conn, err := s.listener.Accept()
 		if err != nil {
-			return fmt.Errorf("accept listener err %v", err)
+			s.log.Errorf("listen connection err %v", err)
+			return
 		}
 
 		requestsChan := make(chan protocol.ClientMessage)
@@ -87,7 +101,10 @@ func (s *server) Listen() error {
 			continue
 		}
 
-		conn.Write([]byte(fmt.Sprintf("client %s connected \n", cl.Addr())))
+		_, err = conn.Write([]byte(fmt.Sprintf("client %s connected \n", cl.Addr())))
+		if err != nil {
+			s.log.Errorf("send client %s ping message err %v", cl.Addr(), err)
+		}
 
 		s.log.Debugf("client: %s connected", cl.Addr())
 
@@ -107,13 +124,16 @@ func (s *server) handle(cl client.Client, requests chan protocol.ClientMessage, 
 	disconnect := make(chan struct{})
 
 	defer func() {
-		cl.Close()
+		_ = cl.Close() // :WARNING: connection might be already closed so that's why we are in this defer; skip error already closed err logging
 		disconnect <- struct{}{}
 	}()
 
 	go s.handleRequests(cl, requests, errors, disconnect)
 
-	cl.Listen()
+	err := cl.Listen()
+	if err != nil {
+		s.log.Errorf("client %s listen err conn close %v", cl.Addr(), err)
+	}
 }
 
 func (s *server) handleRequests(cl client.Client, requests chan protocol.ClientMessage, errors chan error, disconnect chan struct{}) {
@@ -137,7 +157,10 @@ func (s *server) handleRequests(cl client.Client, requests chan protocol.ClientM
 				continue
 			}
 
-			ses.SendErr(errMsg)
+			err = ses.SendErr(errMsg)
+			if err != nil {
+				s.log.Errorf("send err to client %s err %v", cl.Addr(), err)
+			}
 		case <-disconnect:
 			err := s.sessioner.Unregister(cl)
 			if err != nil {
