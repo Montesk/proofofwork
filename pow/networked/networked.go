@@ -9,7 +9,6 @@ import (
 	"github.com/Montesk/proofofwork/config"
 	"github.com/Montesk/proofofwork/core/errors"
 	"github.com/Montesk/proofofwork/core/logger"
-	"github.com/Montesk/proofofwork/handlers"
 	"github.com/Montesk/proofofwork/pow/pow"
 	"github.com/Montesk/proofofwork/protocol"
 	"net"
@@ -50,6 +49,8 @@ func New(cfg config.Config, log logger.Logger) pow.POW {
 
 	cl.conn = conn
 
+	go cl.listenServerStatus(cl.conn.LocalAddr().String())
+
 	return cl
 }
 
@@ -60,7 +61,7 @@ func (n *networked) Generate(clientId string) (string, error) {
 	}
 
 	msg := protocol.ClientMessage{
-		Controller: handlers.ChallengeController,
+		Controller: protocol.ChallengeController,
 	}
 
 	raw, err := json.Marshal(msg)
@@ -75,7 +76,7 @@ func (n *networked) Generate(clientId string) (string, error) {
 		return "", err
 	}
 
-	result, err := waitForMessage[protocol.ChallengeAction](n.conn)
+	result, err := waitForMessage[protocol.ChallengeActionMsg](n.conn)
 	if err != nil {
 		n.log.Errorf("client wait generate message %s error %v", clientId, err)
 		return "", err
@@ -93,7 +94,7 @@ func (n *networked) Prove(clientId, hash string) (success bool) {
 	}
 
 	msg := protocol.ClientMessage{
-		Controller: handlers.ProveController,
+		Controller: protocol.ProveController,
 		Message:    []byte(fmt.Sprintf(`{ "suggest": "%s" }`, hash)),
 	}
 
@@ -109,7 +110,7 @@ func (n *networked) Prove(clientId, hash string) (success bool) {
 		return false
 	}
 
-	result, err := waitForMessage[protocol.ProveAction](n.conn)
+	result, err := waitForMessage[protocol.ProveActionMsg](n.conn)
 	if err != nil {
 		n.log.Errorf("client wait prove message %s error %v", clientId, err)
 		return false
@@ -122,6 +123,42 @@ func (n *networked) Prove(clientId, hash string) (success bool) {
 	}
 
 	return result.Success
+}
+
+func (n *networked) listenServerStatus(clientId string) {
+	reader := bufio.NewReader(n.conn)
+
+	for {
+		raw, err := reader.ReadBytes('\n')
+		if err != nil {
+			n.log.Errorf("client read bytes listening server status err %v", err)
+			return
+		}
+
+		wrapper := protocol.Action{}
+		err = json.Unmarshal(raw, &wrapper)
+		if err != nil || wrapper.Action != protocol.InfoAction {
+			// wait only for server info actions
+			continue
+		}
+
+		res, ok := wrapper.Message.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		rawFromMap, _ := json.Marshal(res)
+
+		msg := protocol.ServerInfoActionMsg{}
+		err = json.Unmarshal(rawFromMap, &msg)
+		if err != nil {
+			n.log.Errorf("server status unmarshal error", err)
+			continue
+		}
+
+		n.log.Infof("client %s got server message: %v", clientId, msg.Info)
+		return
+	}
 }
 
 func waitForMessage[T any](conn net.Conn) (T, error) {
@@ -141,6 +178,7 @@ func waitForMessage[T any](conn net.Conn) (T, error) {
 
 			err = json.Unmarshal(raw, &wrapper)
 			if err != nil {
+				// :KLUDGE: as we wait for specific message passed from typed parameter let's say it's ok to ignore unmarshal err for integration test purposes
 				continue
 			}
 

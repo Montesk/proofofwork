@@ -27,8 +27,8 @@ func main() {
 
 	wg := new(sync.WaitGroup)
 	for i := 0; i < args.POWClients(); i++ {
+		wg.Add(1)
 		go func(idx int) {
-			wg.Add(1)
 			defer wg.Done()
 
 			log.Debugf("client N %d connected", idx)
@@ -50,7 +50,6 @@ func main() {
 			} else {
 				log.Infof("client %d suggested challenge in %d tries", idx, tries)
 			}
-
 		}(i)
 	}
 	wg.Wait()

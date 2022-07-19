@@ -4,6 +4,20 @@ package protocol
 
 import "encoding/json"
 
+// Actions
+const (
+	ChallengeAction = "challenge"
+	ProveAction     = "prove"
+	InfoAction      = "info"
+)
+
+// Controllers
+const (
+	ChallengeController = "challenge"
+	ProveController     = "prove"
+)
+
+// DTO
 type (
 	ClientMessage struct {
 		Controller string          `json:"controller"`
@@ -21,21 +35,21 @@ type (
 	}
 
 	// Client -> Server
-	ProveController struct {
+	ProveControllerMsg struct {
 		Suggest string `json:"suggest"`
 	}
 
 	// Server -> Client
-	ChallengeAction struct {
+	ChallengeActionMsg struct {
 		Challenge string `json:"challenge"`
 	}
 
-	ProveAction struct {
+	ProveActionMsg struct {
 		Success bool   `json:"success"`
 		Message string `json:"message"`
 	}
 
-	NotifyServerCloseAction struct {
+	ServerInfoActionMsg struct {
 		Info string `json:"info"`
 	}
 )

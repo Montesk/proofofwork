@@ -99,7 +99,7 @@ func (s *memory) Close() {
 		wg.Add(1)
 		go func(cl online) {
 			// client information message err is not relevant to handle or logging this error
-			_ = cl.session.Send("info", protocol.NotifyServerCloseAction{Info: "server will be closed shortly"})
+			_ = cl.session.Send(protocol.InfoAction, protocol.ServerInfoActionMsg{Info: "server will be closed shortly"})
 
 			time.Sleep(serverDisconnectTimeout)
 

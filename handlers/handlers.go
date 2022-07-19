@@ -46,6 +46,6 @@ func New(log logger.Logger) Handlers {
 }
 
 func (h *handlers) setupRoutes() {
-	h.list[ChallengeController] = router.BuildRoute[any](h.ChallengeHandler)
-	h.list[ProveController] = router.BuildRoute[protocol.ProveController](h.ProveHandler)
+	h.list[protocol.ChallengeController] = router.BuildRoute[any](h.ChallengeHandler)
+	h.list[protocol.ProveController] = router.BuildRoute[protocol.ProveControllerMsg](h.ProveHandler)
 }

@@ -5,11 +5,6 @@ import (
 	"github.com/Montesk/proofofwork/session"
 )
 
-const (
-	ChallengeController = "challenge"
-	ChallengeAction     = "challenge"
-)
-
 func (h *handlers) ChallengeHandler(ses session.Session, _ any) {
 	challenge, err := h.pow.Generate(ses.ClientId())
 	if err != nil {
@@ -17,7 +12,7 @@ func (h *handlers) ChallengeHandler(ses session.Session, _ any) {
 		return
 	}
 
-	err = ses.Send(ChallengeAction, protocol.ChallengeAction{
+	err = ses.Send(protocol.ChallengeAction, protocol.ChallengeActionMsg{
 		Challenge: challenge,
 	})
 	if err != nil {

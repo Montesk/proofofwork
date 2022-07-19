@@ -5,24 +5,19 @@ import (
 	"github.com/Montesk/proofofwork/session"
 )
 
-const (
-	ProveController = "prove"
-	ProveAction     = "prove"
-)
-
-func (h *handlers) ProveHandler(ses session.Session, msg protocol.ProveController) {
+func (h *handlers) ProveHandler(ses session.Session, msg protocol.ProveControllerMsg) {
 	success := h.pow.Prove(ses.ClientId(), msg.Suggest)
 
 	h.log.Debugf("received prove attempt from client %s msg %s", ses.ClientId(), msg.Suggest)
 
 	var err error
 	if success {
-		err = ses.Send(ProveAction, protocol.ProveAction{
+		err = ses.Send(protocol.ProveAction, protocol.ProveActionMsg{
 			Success: true,
 			Message: h.book.RandomQuote(),
 		})
 	} else {
-		err = ses.Send(ProveAction, protocol.ProveAction{
+		err = ses.Send(protocol.ProveAction, protocol.ProveActionMsg{
 			Success: false,
 			Message: "try again",
 		})
