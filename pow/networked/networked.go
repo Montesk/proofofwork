@@ -116,7 +116,7 @@ func (n *networked) Prove(clientId, hash string) (success bool) {
 	}
 
 	if result.Success {
-		n.log.Debugf("client %s N %s succesfully decode message: %s", clientId, n.conn.LocalAddr(), result.Message)
+		n.log.Infof("client %s N %s successfully decode message: %s", clientId, n.conn.LocalAddr(), result.Message)
 		// :WARING: can't close connection here as new connection can take the same system port if system runs concurrently
 		// :NOTE: connection in the end will be closed by the server
 	}

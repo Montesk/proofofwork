@@ -31,8 +31,8 @@ type (
 	}
 
 	ProveAction struct {
-		Success bool
-		Message string
+		Success bool   `json:"success"`
+		Message string `json:"message"`
 	}
 
 	NotifyServerCloseAction struct {
